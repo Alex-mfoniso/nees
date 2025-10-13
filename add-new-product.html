@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add New Product</title>
+  <link rel="stylesheet" href="assets/css/vendors/bootstrap.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: #1a3c34;
+      padding-top: 20px;
+      color: white;
+      transition: transform 0.3s ease-in-out;
+    }
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    .sidebar .nav-item {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .sidebar .nav-item:hover,
+    .sidebar .nav-item.active {
+      background-color: #2a4c44;
+    }
+    .sidebar .nav-item a {
+      color: white;
+      text-decoration: none;
+      display: block;
+    }
+    .sidebar .nav-item ul {
+      list-style: none;
+      padding-left: 20px;
+      display: none;
+    }
+    .sidebar .nav-item ul li a {
+      padding: 5px 0;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #ffffff;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-left: 250px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .navbar .search-bar input {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .navbar .user-menu {
+      position: relative;
+      cursor: pointer;
+    }
+    .navbar .user-menu img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+    .navbar .hamburger {
+      display: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Page Content */
+    .page-body-wrapper {
+      margin-left: 250px;
+      padding: 20px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .navbar {
+        margin-left: 0;
+      }
+      .page-body-wrapper {
+        margin-left: 0;
+        padding: 15px;
+      }
+      .navbar .hamburger {
+        display: block;
+      }
+    }
+
+    /* Form */
+    form .mb-3 label {
+      font-weight: 500;
+    }
+    form .btn {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2 style="text-align:center; padding:10px;">Fastkart.</h2>
+    <div class="nav-item">
+      <a href="index.html "><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    </div>
+    <div class="nav-item active">
+      <a href="#"><i class="fas fa-box"></i> Product</a>
+      <ul>
+        <li><a href="./products.html">Products</a></li>
+        <li><a href="add-new-product.html">Add New Products</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <span class="hamburger" id="hamburger">&#9776;</span>
+    <div class="search-bar">
+      <input type="text" placeholder="Search Admin..." />
+    </div>
+    <div class="user-menu">
+      <span>Emay Walter <img src="assets/images/user.jpg" alt="User" /></span>
+      <div class="dropdown-menu" style="display:none; position:absolute; background-color:#fff; border:1px solid #ddd; padding:10px;">
+        <a href="#">Users</a>
+        <a href="#">Orders</a>
+        <a href="#">Sports Tickets</a>
+        <a href="#">Settings</a>
+        <a href="#">Log out</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-body-wrapper">
+    <div class="container mt-4">
+      <h3>Add New Product</h3>
+      <form id="productForm" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label>Product Name</label>
+          <input type="text" name="name" class="form-control" placeholder="Product Name" required />
+        </div>
+
+        <div class="mb-3">
+          <label>Product Type</label>
+          <select name="type" class="form-control" required>
+            <option disabled selected value="">Select Type</option>
+            <option value="Simple">Simple</option>
+            <option value="Classified">Classified</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label>Category</label>
+          <select name="category" class="form-control" required>
+            <option disabled selected value="">Select Category</option>
+            <option value="Solar Panel">Solar Panel</option>
+            <option value="Battery">Battery</option>
+            <option value="Solar System">Solar System</option>
+            <option value="Inverter">Inverter</option>
+          </select>
+        </div>
+
+        <div class="mb-3" id="batteryStatusDiv" style="display:none;">
+          <label>Battery Status</label>
+          <select name="batteryStatus" class="form-control">
+            <option disabled selected value="">Select Status</option>
+            <option value="New">New</option>
+            <option value="Used">Used</option>
+            <option value="Refurbished">Refurbished</option>
+          </select>
+        </div>
+
+        <input type="hidden" name="availability" value="In Stock" />
+
+        <div class="mb-3">
+          <label>Product Description</label>
+          <div id="productDescriptionEditor"></div>
+        </div>
+
+        <div class="mb-3">
+          <label>Images</label>
+          <input type="file" name="images" class="form-control" multiple />
+        </div>
+
+        <div class="mb-3">
+          <label>Thumbnail</label>
+          <input type="file" name="thumbnail" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+          <label>Price</label>
+          <input type="number" name="price" class="form-control" placeholder="0" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Product</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/jquery-3.6.0.min.js"></script>
+  <script src="assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/ckeditor.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+  <script>
+const backendUrl = "http://localhost:5000";
+
+// Sidebar toggle for mobile
+const hamburger = document.getElementById("hamburger");
+const sidebar = document.getElementById("sidebar");
+hamburger.addEventListener("click", () => {
+  sidebar.classList.toggle("show");
+});
+
+// Dropdown toggle
+const userMenu = document.querySelector('.user-menu');
+userMenu.addEventListener('click', () => {
+  const dropdown = userMenu.querySelector('.dropdown-menu');
+  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// Show battery status only for batteries
+const categorySelect = document.querySelector('select[name="category"]');
+const batteryStatusDiv = document.getElementById("batteryStatusDiv");
+categorySelect.addEventListener("change", (e) => {
+  batteryStatusDiv.style.display = e.target.value === "Battery" ? "block" : "none";
+});
+
+// CKEditor
+let editorInstance;
+ClassicEditor.create(document.querySelector("#productDescriptionEditor"))
+  .then(editor => editorInstance = editor)
+  .catch(err => console.error(err));
+
+// Form submission
+const form = document.getElementById("productForm");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Get token
+  const token = localStorage.getItem("token");
+  if (!token) return alert("Not authenticated");
+
+  const formData = new FormData(form);
+
+  // Add CKEditor content
+  formData.set("description", editorInstance.getData());
+
+  // Add batteryStatus only if visible
+  if (batteryStatusDiv.style.display === "block") {
+    formData.set("batteryStatus", form.batteryStatus.value);
+  }
+
+  try {
+    const res = await fetch(`${backendUrl}/api/products`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Failed to add product");
+    }
+
+    alert("Product added successfully!");
+    form.reset();
+    editorInstance.setData("");
+    batteryStatusDiv.style.display = "none";
+  } catch (err) {
+    alert(err.message);
+  }
+});
+</script>
+</body>
+</html>
