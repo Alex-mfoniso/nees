@@ -389,28 +389,40 @@ app.get("/", (req, res) => res.send("API alive with sql.js"));
 // ==========================
 app.post("/api/admin/register", (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: "Username and password required" });
+  if (!username || !password)
+    return res.status(400).json({ error: "Username and password required" });
 
   const hashed = bcrypt.hashSync(password, 10);
 
   try {
     db.run("INSERT INTO admins (username, password) VALUES (?, ?);", [username, hashed]);
+    const stmt = db.prepare("SELECT last_insert_rowid() as id;");
+    stmt.step();
+    const lastId = stmt.getAsObject().id;
+    stmt.free();
+
     saveDB();
-    res.json({ message: "Admin created" });
+
+    res.json({ message: "Admin created", id: lastId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
   try {
     const stmt = db.prepare("SELECT * FROM admins WHERE username = ?;");
     stmt.bind([username]);
-    const admin = stmt.getAsObject();
+
+    let admin = null;
+    if (stmt.step()) {
+      admin = stmt.getAsObject();
+    }
     stmt.free();
 
-    if (!admin.id) return res.status(400).json({ error: "Invalid credentials" });
+    if (!admin) return res.status(400).json({ error: "Invalid credentials" });
 
     const isValid = bcrypt.compareSync(password, admin.password);
     if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
@@ -421,6 +433,7 @@ app.post("/api/admin/login", (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ==========================
 // PRODUCTS ROUTES

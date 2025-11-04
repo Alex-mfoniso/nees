@@ -148,7 +148,7 @@
       const password = document.getElementById("password").value;
 
       try {
-        const res = await fetch("http://https://nees-1.onrender.com//api/admin/register", {
+        const res = await fetch("https://nees-1.onrender.com/api/admin/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password })
