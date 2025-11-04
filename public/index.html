@@ -198,5 +198,29 @@
             </section>
         </main>
     </div>
+    <script>
+        
+  // Check if user is logged in
+  const token = localStorage.getItem("token"); // You can also use a "loggedIn" flag
+
+  if (!token) {
+    // Redirect to login page if not logged in
+    window.location.href = "login.html";
+  }
+
+  try {
+    // Optional: decode JWT token and check expiration if using JWT
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const exp = payload.exp * 1000; // expiration in ms
+    if (Date.now() > exp) {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
+  } catch (e) {
+    // Invalid token
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+  }
+    </script>
 </body>
 </html>

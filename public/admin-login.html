@@ -169,49 +169,53 @@
     togglePassword.addEventListener("change", () => {
       passwordInput.type = togglePassword.checked ? "text" : "password";
     });
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
 
-  const username = document.getElementById("username").value.trim();
-  const password = passwordInput.value.trim();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-  console.log("Attempting login with:", { username, password }); // Debug log
+      const username = document.getElementById("username").value.trim();
+      const password = passwordInput.value.trim();
 
-  if (!username || !password) {
-    message.style.color = "red";
-    message.textContent = "Username and password required";
-    return;
-  }
+      if (!username || !password) {
+        message.style.color = "red";
+        message.textContent = "Username and password required";
+        return;
+      }
 
-  try {
-    const res = await fetch("https://nees-1.onrender.com/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      try {
+        const res = await fetch("https://nees-1.onrender.com/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.style.color = "red";
+          message.textContent = data.error || "Invalid credentials";
+          return;
+        }
+
+        if (!data.token) {
+          message.style.color = "red";
+          message.textContent = "Token missing from server";
+          return;
+        }
+
+        localStorage.setItem("token", data.token);
+        message.style.color = "green";
+        message.textContent = "Login successful! Redirecting...";
+
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1000);
+
+      } catch (err) {
+        message.style.color = "red";
+        message.textContent = "Server error: " + err.message;
+      }
     });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
-      message.style.color = "green";
-      message.textContent = "Login successful! Redirecting...";
-
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 1000);
-    } else {
-      console.warn("Login failed:", data); // Debug log
-      message.style.color = "red";
-      message.textContent = data.error || "Invalid credentials";
-    }
-  } catch (err) {
-    console.error(err);
-    message.style.color = "red";
-    message.textContent = "Server error: " + err.message;
-  }
-});
-  
   </script>
 </body>
 </html>
