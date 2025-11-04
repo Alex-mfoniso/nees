@@ -410,6 +410,35 @@ app.delete("/api/products/:id", authenticate, (req, res) => {
     }
 });
 
+// GET product count for debugging
+app.get("/debug/product-count", (req, res) => {
+    try {
+        const stmt = db.prepare("SELECT COUNT(*) AS count FROM products;");
+        stmt.step();
+        const result = stmt.getAsObject();
+        stmt.free();
+
+        // Check if the file timestamp reflects the last save time
+        let dbFileStats = null;
+        try {
+            dbFileStats = fs.statSync(DB_FILE);
+        } catch (e) {
+            // File might not exist yet if the server just started
+        }
+
+        res.json({
+            status: "OK",
+            productCount: result.count,
+            dbFileExists: !!dbFileStats,
+            dbLastModified: dbFileStats ? dbFileStats.mtime.toISOString() : "N/A",
+            message: "Check if 'productCount' increments after a successful POST. If it resets to 0 after server restart/deploy, your database persistence is the issue.",
+        });
+    } catch (err) {
+        console.error("Error during product count debug:", err);
+        res.status(500).json({ error: "Failed to read database for count: " + err.message });
+    }
+});
+
 app.get("/debug/admins", (req, res) => {
     const stmt = db.prepare("SELECT * FROM admins;");
     const rows = [];
