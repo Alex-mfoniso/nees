@@ -279,91 +279,74 @@
 
 
 import path from "path";
+import fs from "fs";
 import express from "express";
-import bodyParser from "body-parser";
+import initSqlJs from "sql.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import multer from "multer";
-import fs from "fs";
-import initSqlJs from "sql.js";
+import bodyParser from "body-parser";
 
 const app = express();
 
 // ======================
-// SETUP
+// CONFIG
 // ======================
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
 app.use(bodyParser.json());
 
-const JWT_SECRET = "supersecretkey"; // Hardcoded since no .env
+const JWT_SECRET = "supersecretkey"; // can change later
 
 // ======================
-// MULTER FILE UPLOAD
+// MULTER SETUP
 // ======================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "./uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
 
 // ======================
-// SQL.JS DATABASE
+// SQL.JS INIT
 // ======================
-const DB_FILE = "./database.sqlite";
-
-let SQL;
-let db;
-
-(async () => {
-  SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
-
-  // Load existing DB or create new
-  if (fs.existsSync(DB_FILE)) {
-    const fileBuffer = fs.readFileSync(DB_FILE);
-    db = new SQL.Database(fileBuffer);
-  } else {
-    db = new SQL.Database();
-  }
-
-  // Initialize tables if not exists
-  db.run(`
-    CREATE TABLE IF NOT EXISTS admins (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE,
-      password TEXT
-    );
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS products (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      type TEXT,
-      description TEXT,
-      price REAL,
-      category TEXT,
-      tags TEXT,
-      exchangeable INTEGER,
-      refundable INTEGER,
-      thumbnail TEXT,
-      images TEXT,
-      availability TEXT
-    );
-  `);
-
-  saveDB();
-  console.log("✅ SQL.js database ready");
-})();
+const wasmFile = path.join(
+  process.cwd(),
+  "node_modules/sql.js/dist/sql-wasm.wasm"
+);
+const SQL = await initSqlJs({ locateFile: () => wasmFile });
+const db = new SQL.Database();
 
 // ======================
-// HELPERS
+// CREATE TABLES
 // ======================
-function saveDB() {
-  const data = db.export();
-  fs.writeFileSync(DB_FILE, Buffer.from(data));
-}
+db.run(`
+CREATE TABLE IF NOT EXISTS admins (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE,
+  password TEXT
+);
+`);
+
+db.run(`
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  type TEXT,
+  description TEXT,
+  price REAL,
+  category TEXT,
+  tags TEXT,
+  exchangeable INTEGER,
+  refundable INTEGER,
+  thumbnail TEXT,
+  images TEXT,
+  availability TEXT
+);
+`);
+
+console.log("✅ SQLite (sql.js) ready");
 
 // ======================
 // AUTH MIDDLEWARE
@@ -383,10 +366,10 @@ const authenticate = (req, res, next) => {
 };
 
 // ======================
-// ROOT
+// ROOT ROUTE
 // ======================
 app.get("/", (req, res) => {
-  res.send("API is alive with SQL.js");
+  res.send("API is alive with SQLite (sql.js)");
 });
 
 // ======================
@@ -400,11 +383,12 @@ app.post("/api/admin/register", (req, res) => {
   const hashed = bcrypt.hashSync(password, 10);
 
   try {
-    const stmt = db.prepare("INSERT INTO admins (username, password) VALUES (?, ?)");
-    stmt.run([username, hashed]);
-    stmt.free();
-    saveDB();
-    res.json({ message: "Admin created" });
+    db.run(
+      `INSERT INTO admins (username, password) VALUES (?, ?)`,
+      [username, hashed]
+    );
+    const id = db.exec("SELECT last_insert_rowid() AS id")[0].values[0][0];
+    res.json({ message: "Admin created", id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -413,95 +397,74 @@ app.post("/api/admin/register", (req, res) => {
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
 
-  try {
-    const stmt = db.prepare("SELECT * FROM admins WHERE username = ?");
-    stmt.bind([username]);
-    if (!stmt.step()) return res.status(400).json({ error: "Invalid credentials" });
+  const stmt = db.prepare(`SELECT * FROM admins WHERE username = ?`);
+  stmt.bind([username]);
+  const result = stmt.getAsObject();
+  stmt.free();
 
-    const admin = stmt.getAsObject();
-    stmt.free();
+  if (!result.id) return res.status(400).json({ error: "Invalid credentials" });
 
-    const isValid = bcrypt.compareSync(password, admin.password);
-    if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
+  const isValid = bcrypt.compareSync(password, result.password);
+  if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, {
-      expiresIn: "2h"
-    });
+  const token = jwt.sign({ id: result.id, username: result.username }, JWT_SECRET, {
+    expiresIn: "2h",
+  });
 
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json({ token });
 });
 
 // ======================
-// PRODUCTS ROUTES
+// PRODUCT ROUTES
 // ======================
 app.get("/api/products", (req, res) => {
-  try {
-    const stmt = db.prepare("SELECT * FROM products");
-    const products = [];
-    while (stmt.step()) {
-      const row = stmt.getAsObject();
-      row.price = Number(row.price);
-      row.images = JSON.parse(row.images || "[]");
-      products.push(row);
+  const stmt = db.prepare("SELECT * FROM products");
+  const products = [];
+  while (stmt.step()) {
+    const p = stmt.getAsObject();
+    products.push({ ...p, price: Number(p.price), images: JSON.parse(p.images || "[]") });
+  }
+  stmt.free();
+  res.json(products);
+});
+
+app.post(
+  "/api/products",
+  authenticate,
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "thumbnail", maxCount: 1 },
+  ]),
+  (req, res) => {
+    const { name, type, description, price, category } = req.body;
+    if (!name || !price || !category)
+      return res.status(400).json({ error: "Name, price and category required" });
+
+    const images = req.files["images"]
+      ? req.files["images"].map(f => `/uploads/${f.filename}`)
+      : [];
+
+    const thumbnail =
+      req.files["thumbnail"]?.[0] ? `/uploads/${req.files["thumbnail"][0].filename}` : images[0] || "";
+
+    try {
+      db.run(
+        `INSERT INTO products 
+        (name, type, description, price, category, tags, exchangeable, refundable, thumbnail, images, availability)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [name, type || "general", description || "", price, category, "[]", 0, 0, thumbnail, JSON.stringify(images), "in stock"]
+      );
+      const id = db.exec("SELECT last_insert_rowid() AS id")[0].values[0][0];
+      res.json({ id });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-    stmt.free();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
-});
-
-app.post("/api/products", authenticate, upload.fields([
-  { name: "images", maxCount: 5 },
-  { name: "thumbnail", maxCount: 1 }
-]), (req, res) => {
-  const { name, type, description, price, category } = req.body;
-
-  if (!name || !price || !category)
-    return res.status(400).json({ error: "Name, price and category required" });
-
-  let images = [];
-  if (req.files["images"]) images = req.files["images"].map(f => `/uploads/${f.filename}`);
-  const thumbnail = req.files["thumbnail"]?.[0] ? `/uploads/${req.files["thumbnail"][0].filename}` : images[0] || "";
-
-  try {
-    const stmt = db.prepare(`
-      INSERT INTO products 
-      (name, type, description, price, category, tags, exchangeable, refundable, thumbnail, images, availability)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    stmt.run([
-      name,
-      type || "general",
-      description || "",
-      price,
-      category,
-      "[]",
-      0,
-      0,
-      thumbnail,
-      JSON.stringify(images),
-      "in stock"
-    ]);
-
-    stmt.free();
-    saveDB();
-    res.json({ message: "Product created" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+);
 
 app.delete("/api/products/:id", authenticate, (req, res) => {
   try {
-    const stmt = db.prepare("DELETE FROM products WHERE id = ?");
-    stmt.run([req.params.id]);
-    stmt.free();
-    saveDB();
+    db.run("DELETE FROM products WHERE id = ?", [req.params.id]);
     res.json({ message: "Product deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -511,7 +474,7 @@ app.delete("/api/products/:id", authenticate, (req, res) => {
 // ======================
 // START SERVER
 // ======================
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("✅ Server running on port " + PORT);
 });
