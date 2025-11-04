@@ -9,6 +9,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.15.1",
+    "pg": "^8.16.3",
     "sql.js": "^1.13.0"
   },
   "devDependencies": {
