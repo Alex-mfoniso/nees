@@ -11,7 +11,7 @@
       justify-content: center;
       align-items: center;
       font-family: "Segoe UI", Arial, sans-serif;
-      background: #20ED93; /* Bright green background */
+      background: #20ED93;
     }
 
     .login-box {
@@ -142,7 +142,6 @@
         <input type="password" id="password" placeholder="Enter your password" required />
       </div>
 
-      <!-- Show Password toggle -->
       <label class="show-password">
         <input type="checkbox" id="togglePassword" />
         Show Password
@@ -167,44 +166,52 @@
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
 
-    // Toggle password visibility
     togglePassword.addEventListener("change", () => {
       passwordInput.type = togglePassword.checked ? "text" : "password";
     });
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    // Form submission
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  const username = document.getElementById("username").value.trim();
+  const password = passwordInput.value.trim();
 
-      const username = document.getElementById("username").value;
-      const password = passwordInput.value;
+  console.log("Attempting login with:", { username, password }); // Debug log
 
-      try {
-        const res = await fetch("https://nees-1.onrender.com/api/admin/login", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, password }),
-});
+  if (!username || !password) {
+    message.style.color = "red";
+    message.textContent = "Username and password required";
+    return;
+  }
 
-
-        const data = await res.json();
-        if (res.ok) {
-          localStorage.setItem("token", data.token);
-          message.style.color = "green";
-          message.textContent = "Login successful! Redirecting...";
-
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 1000);
-        } else {
-          message.style.color = "red";
-          message.textContent = data.error;
-        }
-      } catch (err) {
-        message.style.color = "red";
-        message.textContent = "Server error: " + err.message;
-      }
+  try {
+    const res = await fetch("https://nees-1.onrender.com/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
     });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      message.style.color = "green";
+      message.textContent = "Login successful! Redirecting...";
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000);
+    } else {
+      console.warn("Login failed:", data); // Debug log
+      message.style.color = "red";
+      message.textContent = data.error || "Invalid credentials";
+    }
+  } catch (err) {
+    console.error(err);
+    message.style.color = "red";
+    message.textContent = "Server error: " + err.message;
+  }
+});
+  
   </script>
 </body>
 </html>

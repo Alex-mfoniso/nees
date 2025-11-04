@@ -1,291 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add New Product</title>
-  <link rel="stylesheet" href="assets/css/vendors/bootstrap.css" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <style>
-    /* Sidebar */
-    .sidebar {
-      width: 250px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background-color: #1a3c34;
-      padding-top: 20px;
-      color: white;
-      transition: transform 0.3s ease-in-out;
-    }
-    .sidebar.hidden {
-      transform: translateX(-100%);
-    }
-    .sidebar .nav-item {
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    .sidebar .nav-item:hover,
-    .sidebar .nav-item.active {
-      background-color: #2a4c44;
-    }
-    .sidebar .nav-item a {
-      color: white;
-      text-decoration: none;
-      display: block;
-    }
-    .sidebar .nav-item ul {
-      list-style: none;
-      padding-left: 20px;
-      display: none;
-    }
-    .sidebar .nav-item ul li a {
-      padding: 5px 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Add Product</title>
+    <link rel="stylesheet" href="style.css" />
 
-    /* Navbar */
-    .navbar {
-      background-color: #ffffff;
-      padding: 10px 20px;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-left: 250px;
-      transition: margin-left 0.3s ease-in-out;
-    }
-    .navbar .search-bar input {
-      width: 100%;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .navbar .user-menu {
-      position: relative;
-      cursor: pointer;
-    }
-    .navbar .user-menu img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      margin-left: 10px;
-    }
-    .navbar .hamburger {
-      display: none;
-      font-size: 24px;
-      cursor: pointer;
-    }
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    /* Page Content */
-    .page-body-wrapper {
-      margin-left: 250px;
-      padding: 20px;
-      transition: margin-left 0.3s ease-in-out;
-    }
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
 
-    /* Responsive */
-    @media (max-width: 992px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      .sidebar.show {
-        transform: translateX(0);
-      }
-      .navbar {
-        margin-left: 0;
-      }
-      .page-body-wrapper {
-        margin-left: 0;
-        padding: 15px;
-      }
-      .navbar .hamburger {
-        display: block;
-      }
-    }
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <aside class="sidebar" id="sidebar">
+        <div class="logo">
+          <img
+            src="https://via.placeholder.com/40x40?text=Logo"
+            alt="Neelsolar Logo"
+          />
+          <span>NEESOLAR</span>
+        </div>
+        <nav class="main-nav">
+          <ul>
+            <li>
+              <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            <li class="active">
+              <a href="#"><i class="fas fa-plus-circle"></i> Add Products</a>
+            </li>
+            <li>
+              <a href="#"><i class="fas fa-box-open"></i> Product Stock</a>
+            </li>
+            <li>
+              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
-    /* Form */
-    form .mb-3 label {
-      font-weight: 500;
-    }
-    form .btn {
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <h2 style="text-align:center; padding:10px;">Fastkart.</h2>
-    <div class="nav-item">
-      <a href="index.html "><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <main class="main-content">
+        <header class="top-header">
+          <button class="hamburger-btn" id="hamburger">
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="search-bar">
+            <input type="text" placeholder="Search Fastkart..." />
+            <button><i class="fas fa-search"></i></button>
+          </div>
+          <div class="header-actions">
+            <div class="action-item">
+              <i class="fas fa-bell"></i><span class="badge"></span>
+            </div>
+            <div class="action-item"><i class="fas fa-cog"></i></div>
+
+            <div class="user-profile user-menu">
+              <img
+                src="https://via.placeholder.com/30x30?text=EW"
+                alt="User Avatar"
+              />
+              <div class="user-info">
+                <span>Emyy Waker</span>
+                <small>Admin <i class="fas fa-caret-down"></i></small>
+              </div>
+              <div class="dropdown-menu">
+                <a href="#">Profile</a>
+                <a href="#">Settings</a>
+                <a href="#">Logout</a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <form id="productForm" enctype="multipart/form-data">
+          <div class="form-section product-info-section card">
+            <h2>Product Information</h2>
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="productName">Product Name</label>
+                <input
+                  type="text"
+                  id="productName"
+                  name="productName"
+                  placeholder="Product Name"
+                />
+              </div>
+              <div class="input-group">
+                <label for="productType">Product Type</label>
+                <select id="productType" name="productType">
+                  <option>Simple</option>
+                  <option>Configurable</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                  <option>Electronics</option>
+                  <option>Solar</option>
+                  <option>Battery</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="subcategory">Subcategory</label>
+                <select id="subcategory" name="subcategory">
+                  <option>Electric Wire</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label for="brand">Brand</label>
+                <select id="brand" name="brand">
+                  <option>Puma</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="unit">Unit</label>
+                <select id="unit" name="unit">
+                  <option>Kilogram</option>
+                </select>
+              </div>
+
+              <div class="input-group full-width">
+                <label for="tags">Tags</label>
+                <input
+                  type="text"
+                  id="tags"
+                  name="tags"
+                  placeholder="Type tag & hit enter"
+                />
+              </div>
+
+              <div
+                class="input-group full-width"
+                id="batteryStatusDiv"
+                style="display: none"
+              >
+                <label for="batteryStatus">Battery Status (Custom Field)</label>
+                <input
+                  type="text"
+                  id="batteryStatus"
+                  name="batteryStatus"
+                  placeholder="e.g., Charged, Low"
+                />
+              </div>
+
+              <div class="input-group toggle-group">
+                <label>Exchangeable</label>
+                <label class="switch">
+                  <input type="checkbox" name="exchangeable" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="input-group toggle-group">
+                <label>Refundable</label>
+                <label class="switch">
+                  <input type="checkbox" name="refundable" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section description-section card">
+            <h2>Description</h2>
+            <div class="input-group full-width">
+              <label for="productDescriptionEditor">Product Description</label>
+              <div id="productDescriptionEditor"></div>
+            </div>
+          </div>
+
+          <div class="form-section image-upload-section card">
+            <h2>Product Images</h2>
+            <div class="file-group">
+              <label>Images</label>
+              <input type="file" name="images" id="images" multiple />
+            </div>
+            <div class="file-group">
+              <label>Thumbnail Image</label>
+              <input type="file" name="thumbnailImage" id="thumbnailImage" />
+            </div>
+          </div>
+
+          <div class="form-section videos-section card">
+            <h2>Product Videos</h2>
+            <div class="input-group">
+              <label for="videoProvider">Video Provider</label>
+              <select id="videoProvider" name="videoProvider">
+                <option>Vimeo</option>
+                <option>YouTube</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="videoLink">Video Link</label>
+              <input
+                type="text"
+                id="videoLink"
+                name="videoLink"
+                placeholder="Video Link"
+              />
+            </div>
+          </div>
+
+          <div class="form-section variations-section card">
+            <h2>Product Variations</h2>
+            <div class="form-grid variation-grid">
+              <div class="input-group">
+                <label for="optionName">Option Name</label>
+                <select id="optionName" name="optionName">
+                  <option>Color</option>
+                  <option>Size</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="optionValue">Option Value</label>
+                <input
+                  type="text"
+                  id="optionValue"
+                  name="optionValue"
+                  placeholder="Type tag & hit enter"
+                />
+              </div>
+            </div>
+            <a href="#" class="add-option"
+              ><i class="fas fa-plus-circle"></i> Add Another Option</a
+            >
+          </div>
+
+          <div class="form-section shipping-section card">
+            <h2>Shipping</h2>
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="weight">Weight (Kg)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  id="weight"
+                  name="weight"
+                  placeholder="Weight"
+                />
+              </div>
+              <div class="input-group">
+                <label for="dimensions">Dimensions (Cm)</label>
+                <input
+                  type="text"
+                  id="dimensions"
+                  name="dimensions"
+                  placeholder="Length x Width x Height"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section price-section card">
+            <h2>Product Price</h2>
+            <div class="price-input-group">
+              <label for="price">Price</label>
+              <input
+                type="number"
+                step="0.01"
+                id="price"
+                name="price"
+                value="0"
+              />
+              <span class="margin-info">Margin: 25%</span>
+            </div>
+            <div class="price-input-group">
+              <label for="compareAtPrice">Compare at price</label>
+              <input
+                type="number"
+                step="0.01"
+                id="compareAtPrice"
+                name="compareAtPrice"
+                value="0"
+              />
+            </div>
+            <div class="price-input-group">
+              <label for="costPerItem">Cost per item</label>
+              <input
+                type="number"
+                step="0.01"
+                id="costPerItem"
+                name="costPerItem"
+                value="0"
+              />
+              <span class="profit-info">Profit: ₦5</span>
+            </div>
+          </div>
+
+          <div class="form-submit-bar">
+            <button type="submit" class="btn btn-submit">Save Product</button>
+          </div>
+        </form>
+      </main>
     </div>
-    <div class="nav-item active">
-      <a href="#"><i class="fas fa-box"></i> Product</a>
-      <ul>
-        <li><a href="./products.html">Products</a></li>
-        <li><a href="add-new-product.html">Add New Products</a></li>
-      </ul>
-    </div>
-  </div>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <span class="hamburger" id="hamburger">&#9776;</span>
-    <div class="search-bar">
-      <input type="text" placeholder="Search Admin..." />
-    </div>
-    <div class="user-menu">
-      <span>Emay Walter <img src="assets/images/user.jpg" alt="User" /></span>
-      <div class="dropdown-menu" style="display:none; position:absolute; background-color:#fff; border:1px solid #ddd; padding:10px;">
-        <a href="#">Users</a>
-        <a href="#">Orders</a>
-        <a href="#">Sports Tickets</a>
-        <a href="#">Settings</a>
-        <a href="#">Log out</a>
-      </div>
-    </div>
-  </nav>
+ <script>
+    const backendUrl = "https://nees-1.onrender.com";
 
-  <div class="page-body-wrapper">
-    <div class="container mt-4">
-      <h3>Add New Product</h3>
-      <form id="productForm" enctype="multipart/form-data">
-        <div class="mb-3">
-          <label>Product Name</label>
-          <input type="text" name="name" class="form-control" placeholder="Product Name" required />
-        </div>
-
-        <div class="mb-3">
-          <label>Product Type</label>
-          <select name="type" class="form-control" required>
-            <option disabled selected value="">Select Type</option>
-            <option value="Simple">Simple</option>
-            <option value="Classified">Classified</option>
-          </select>
-        </div>
-
-        <div class="mb-3">
-          <label>Category</label>
-          <select name="category" class="form-control" required>
-            <option disabled selected value="">Select Category</option>
-            <option value="Solar Panel">Solar Panel</option>
-            <option value="Battery">Battery</option>
-            <option value="Solar System">Solar System</option>
-            <option value="Inverter">Inverter</option>
-          </select>
-        </div>
-
-        <div class="mb-3" id="batteryStatusDiv" style="display:none;">
-          <label>Battery Status</label>
-          <select name="batteryStatus" class="form-control">
-            <option disabled selected value="">Select Status</option>
-            <option value="New">New</option>
-            <option value="Used">Used</option>
-            <option value="Refurbished">Refurbished</option>
-          </select>
-        </div>
-
-        <input type="hidden" name="availability" value="In Stock" />
-
-        <div class="mb-3">
-          <label>Product Description</label>
-          <div id="productDescriptionEditor"></div>
-        </div>
-
-        <div class="mb-3">
-          <label>Images</label>
-          <input type="file" name="images" class="form-control" multiple />
-        </div>
-
-        <div class="mb-3">
-          <label>Thumbnail</label>
-          <input type="file" name="thumbnail" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-          <label>Price</label>
-          <input type="number" name="price" class="form-control" placeholder="0" required />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Add Product</button>
-      </form>
-    </div>
-  </div>
-
-  <script src="assets/js/jquery-3.6.0.min.js"></script>
-  <script src="assets/js/bootstrap/bootstrap.bundle.min.js"></script>
-  <script src="assets/js/ckeditor.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-  <script>
-const backendUrl = "http://localhost:5000";
-
-// Sidebar toggle for mobile
-const hamburger = document.getElementById("hamburger");
-const sidebar = document.getElementById("sidebar");
-hamburger.addEventListener("click", () => {
-  sidebar.classList.toggle("show");
-});
-
-// Dropdown toggle
-const userMenu = document.querySelector('.user-menu');
-userMenu.addEventListener('click', () => {
-  const dropdown = userMenu.querySelector('.dropdown-menu');
-  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-});
-
-// Show battery status only for batteries
-const categorySelect = document.querySelector('select[name="category"]');
-const batteryStatusDiv = document.getElementById("batteryStatusDiv");
-categorySelect.addEventListener("change", (e) => {
-  batteryStatusDiv.style.display = e.target.value === "Battery" ? "block" : "none";
-});
-
-// CKEditor
-let editorInstance;
-ClassicEditor.create(document.querySelector("#productDescriptionEditor"))
-  .then(editor => editorInstance = editor)
-  .catch(err => console.error(err));
-
-// Form submission
-const form = document.getElementById("productForm");
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  // Get token
-  const token = localStorage.getItem("token");
-  if (!token) return alert("Not authenticated");
-
-  const formData = new FormData(form);
-
-  // Add CKEditor content
-  formData.set("description", editorInstance.getData());
-
-  // Add batteryStatus only if visible
-  if (batteryStatusDiv.style.display === "block") {
-    formData.set("batteryStatus", form.batteryStatus.value);
-  }
-
-  try {
-    const res = await fetch(`${backendUrl}/api/products`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData
+    // Sidebar toggle for mobile
+    const hamburger = document.getElementById("hamburger");
+    const sidebar = document.getElementById("sidebar");
+    hamburger.addEventListener("click", () => {
+        sidebar.classList.toggle("show");
     });
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Failed to add product");
-    }
+    // Dropdown toggle
+    const userMenu = document.querySelector(".user-menu");
+    userMenu.addEventListener("click", () => {
+        const dropdown = userMenu.querySelector(".dropdown-menu");
+        dropdown.style.display =
+            dropdown.style.display === "block" ? "none" : "block";
+    });
 
-    alert("Product added successfully!");
-    form.reset();
-    editorInstance.setData("");
-    batteryStatusDiv.style.display = "none";
-  } catch (err) {
-    alert(err.message);
-  }
-}); 
+    // Show battery status only for batteries
+    const categorySelect = document.querySelector('select[name="category"]');
+    const batteryStatusDiv = document.getElementById("batteryStatusDiv");
+    categorySelect.addEventListener("change", (e) => {
+        // Assuming "Battery" is the specific value that triggers the display
+        batteryStatusDiv.style.display =
+            e.target.value === "Battery" ? "grid" : "none";
+    });
+
+    // CKEditor Initialization
+    let editorInstance;
+    // Use the div ID for CKEditor instantiation
+    ClassicEditor.create(document.querySelector("#productDescriptionEditor"))
+        .then((editor) => (editorInstance = editor))
+        .catch((err) => console.error(err));
+
+    // Form submission
+    const form = document.getElementById("productForm");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Get token
+        const token = localStorage.getItem("token");
+        if (!token) return alert("Not authenticated. Please log in.");
+
+        const formData = new FormData(form);
+
+        // Map form fields to expected server fields (especially for booleans and description)
+        
+        // 1. Add CKEditor content (mapping HTML div ID to server field 'description')
+        formData.set("description", editorInstance.getData());
+
+        // 2. Adjust boolean checkboxes (checked = 1, unchecked = 0)
+        formData.set("exchangeable", form.exchangeable.checked ? "1" : "0");
+        formData.set("refundable", form.refundable.checked ? "1" : "0");
+
+        // 3. Add batteryStatus only if visible (it's already handled by the form.batteryStatus.value if displayed)
+        if (batteryStatusDiv.style.display === "none") {
+            formData.delete("batteryStatus"); // Remove it if category is not Battery
+        }
+
+        // 4. Correct file field names if necessary (HTML already uses 'images' and 'thumbnailImage'. Server expects 'thumbnail'. We must reconcile this.)
+        const thumbnailFile = document.getElementById("thumbnailImage").files[0];
+        if (thumbnailFile) {
+            formData.set("thumbnail", thumbnailFile, thumbnailFile.name);
+        }
+        // Remove the old HTML input name if the server expects 'thumbnail'
+        formData.delete('thumbnailImage');
+
+
+        try {
+            const res = await fetch(`${backendUrl}/api/products`, {
+                method: "POST",
+                headers: {
+                    // Do NOT set 'Content-Type' header when sending FormData with files.
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(
+                    data.error || `Failed to add product (Status: ${res.status})`
+                );
+            }
+
+            alert("Product added successfully!");
+
+            // Reset form and editor on success
+            form.reset();
+            editorInstance.setData("");
+            batteryStatusDiv.style.display = "none";
+        } catch (err) {
+            console.error("Submission Error:", err);
+            alert(`Error: ${err.message}`);
+        }
+    });
 </script>
-</body>
+  </body>
 </html>
