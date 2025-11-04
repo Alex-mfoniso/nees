@@ -1,606 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Product List</title>
-    <link rel="stylesheet" href="style.css" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Product List</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    /* Spinner styles */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #007bff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div id="loader">
+    <div class="spinner"></div>
+  </div>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="loader">
-  <div class="spinner"></div>
-</div>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="https://via.placeholder.com/40x40?text=Logo" alt="Neelsolar Logo" />
+        <span>NEESOLAR</span>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="#"><i class="fas fa-th-large"></i> Dashboard</a></li>
+          <li><a href="#"><i class="fas fa-plus-circle"></i> Add Products</a></li>
+          <li class="active"><a href="#"><i class="fas fa-box-open"></i> Product Stock</a></li>
+          <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+      </nav>
+    </aside>
 
-    <div class="dashboard-container">
-      <aside class="sidebar">
-        <div class="logo">
-          <img
-            src="https://via.placeholder.com/40x40?text=Logo"
-            alt="Neelsolar Logo"
-          />
-          <span>NEESOLAR</span>
+    <main class="main-content">
+      <header class="top-header">
+        <div class="search-bar">
+          <input type="text" placeholder="Search products..." />
+          <button><i class="fas fa-search"></i></button>
         </div>
-        <nav class="main-nav">
-          <ul>
-            <li>
-              <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
-            </li>
-            <li>
-              <a href="#"><i class="fas fa-plus-circle"></i> Add Products</a>
-            </li>
-            <li class="active">
-              <a href="#"><i class="fas fa-box-open"></i> Product Stock</a>
-            </li>
-            <li>
-              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
-      <main class="main-content">
-        <header class="top-header">
-          <div class="search-bar">
-            <input type="text" placeholder="Search Fastkart..." />
-            <button><i class="fas fa-search"></i></button>
-          </div>
-          <div class="header-actions">
-            <div class="action-item">
-              <i class="fas fa-bell"></i><span class="badge"></span>
+        <div class="header-actions">
+          <div class="action-item"><i class="fas fa-bell"></i><span class="badge"></span></div>
+          <div class="action-item"><i class="fas fa-cog"></i></div>
+          <div class="user-profile user-menu">
+            <img src="https://via.placeholder.com/30x30?text=EW" alt="User Avatar" />
+            <div class="user-info">
+              <span>Emyy Waker</span>
+              <small>Admin <i class="fas fa-caret-down"></i></small>
             </div>
-            <div class="action-item"><i class="fas fa-cog"></i></div>
-
-            <div class="user-profile user-menu">
-              <img
-                src="https://via.placeholder.com/30x30?text=EW"
-                alt="User Avatar"
-              />
-              <div class="user-info">
-                <span>Emyy Waker</span>
-                <small>Admin <i class="fas fa-caret-down"></i></small>
-              </div>
-              <div class="dropdown-menu">
-                <a href="#">Profile</a>
-                <a href="#">Settings</a>
-                <a href="#">Logout</a>
-              </div>
+            <div class="dropdown-menu">
+              <a href="#">Profile</a>
+              <a href="#">Settings</a>
+              <a href="#">Logout</a>
             </div>
-          </div>
-        </header>
-
-        <div class="product-list-card card">
-          <div class="card-header-actions">
-            <h1>Products List</h1>
-            <div class="action-buttons">
-              <button class="btn btn-secondary">Import</button>
-              <button class="btn btn-secondary">Export</button>
-              <button class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add Product
-              </button>
-            </div>
-          </div>
-
-          <div class="table-container">
-            <table id="productTable" class="display" style="width: 100%">
-              <thead>
-                <tr>
-                  <th>Product Image</th>
-                  <th>Product Name</th>
-                  <th>Category</th>
-                  <th>Current Qty</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Option</th>
-                </tr>
-              </thead>
-              <tbody id="productTableBody">
-                <tr id="placeholder-row">
-                  <td colspan="7" style="text-align: center; padding: 20px">
-                    Loading products... (Requires JavaScript to fetch data)
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
-      </main>
-    </div>
+      </header>
 
-    <div
-      class="modal fade"
-      id="editProductModal"
-      tabindex="-1"
-      aria-labelledby="editProductModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form id="editProductForm">
-            <div class="modal-header">
-              <h5 class="modal-title" id="editProductModalLabel">
-                Edit Product
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <input type="hidden" id="editProductId" name="id" />
-              <div class="mb-3">
-                <label for="editProductName" class="form-label">Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="editProductName"
-                  name="name"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="editProductPrice" class="form-label">Price</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  id="editProductPrice"
-                  name="price"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="editProductQuantity" class="form-label"
-                  >Quantity</label
-                >
-                <input
-                  type="number"
-                  class="form-control"
-                  id="editProductQuantity"
-                  name="quantity"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="editProductAvailability" class="form-label"
-                  >Availability</label
-                >
-                <select
-                  class="form-select"
-                  id="editProductAvailability"
-                  name="availability"
-                >
-                  <option value="Approved">Approved</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Out of Stock">Out of Stock</option>
-                </select>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button type="submit" class="btn btn-primary">
-                Save changes
-              </button>
-            </div>
-          </form>
+      <div class="product-list-card card">
+        <div class="card-header-actions">
+          <h1>Products List</h1>
+          <div class="action-buttons">
+            <button class="btn btn-secondary">Import</button>
+            <button class="btn btn-secondary">Export</button>
+            <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Product</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table id="productTable" class="display" style="width: 100%">
+            <thead>
+              <tr>
+                <th>Product Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Current Qty</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Option</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 20px">
+                  Loading products...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </main>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="editProductForm">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Product</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editProductId" name="id" />
+            <div class="mb-3">
+              <label for="editProductName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="editProductName" name="name" required />
+            </div>
+            <div class="mb-3">
+              <label for="editProductPrice" class="form-label">Price</label>
+              <input type="number" step="0.01" class="form-control" id="editProductPrice" name="price" required />
+            </div>
+            <div class="mb-3">
+              <label for="editProductQuantity" class="form-label">Quantity</label>
+              <input type="number" class="form-control" id="editProductQuantity" name="quantity" required />
+            </div>
+            <div class="mb-3">
+              <label for="editProductAvailability" class="form-label">Availability</label>
+              <select class="form-select" id="editProductAvailability" name="availability">
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Out of Stock">Out of Stock</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
     </div>
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.js"></script>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      const backendUrl = "https://nees-1.onrender.com";
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.js"></script>
 
-      // Auth check
-      (function () {
-        const token = localStorage.getItem("token");
-        if (!token) window.location.href = "admin-login.html";
-        try {
-          const decoded = jwt_decode(token);
-          if (Date.now() > decoded.exp * 1000) {
-            localStorage.removeItem("token");
-            window.location.href = "admin-login.html";
-          }
-        } catch (e) {
+  <script>
+    const backendUrl = "https://nees-1.onrender.com";
+
+    // Show loader
+    const loader = document.getElementById("loader");
+    function showLoader() { loader.style.display = "flex"; }
+    function hideLoader() { loader.style.display = "none"; }
+
+    // Auth check
+    (function() {
+      const token = localStorage.getItem("token");
+      if (!token) return window.location.href = "admin-login.html";
+      try {
+        const decoded = jwt_decode(token);
+        if (Date.now() > decoded.exp * 1000) {
           localStorage.removeItem("token");
           window.location.href = "admin-login.html";
         }
-      })();
-
-      // Global variables
-      let token = localStorage.getItem("token");
-
-      async function loadProducts() {
-        try {
-          const res = await fetch(`${backendUrl}/api/products`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) throw new Error("Failed to fetch products.");
-          const products = await res.json();
-          const tableBody = document.getElementById("productTableBody");
-
-          // Destroy existing DataTable if it exists
-          if ($.fn.DataTable.isDataTable("#productTable")) {
-            $("#productTable").DataTable().destroy();
-          }
-
-          tableBody.innerHTML = "";
-
-          products.forEach((product) => {
-            const availability = product.availability || "In Stock";
-            const tr = document.createElement("tr");
-            tr.id = `row-${product.id}`;
-            tr.innerHTML = `
-              <td>
-                <div class="table-image">
-                  <img src="${backendUrl}${
-              product.thumbnail
-            }" class="img-fluid" alt="product"/>
-                </div>
-              </td>
-              <td>${product.name}</td>
-              <td>${product.category || ""}</td>
-              <td>${product.quantity || 0}</td>
-              <td>$${(+product.price || 0).toFixed(2)}</td>
-              <td class="${
-                availability === "In Stock"
-                  ? "status-available"
-                  : "status-unavailable"
-              }">
-                <span>${availability}</span>
-              </td>
-              <td>
-                <ul>
-                  <li><a href="order-detail.html"><i class="ri-eye-line"></i></a></li>
-                  <li><a href="javascript:void(0)" onclick='openEditModal(${JSON.stringify(
-                    product
-                  )})'><i class="ri-pencil-line"></i></a></li>
-                  <li><a href="javascript:void(0)" onclick="deleteProduct('${
-                    product.id
-                  }')"><i class="ri-delete-bin-line"></i></a></li>
-                </ul>
-              </td>
-            `;
-            tableBody.appendChild(tr);
-          });
-
-          $("#productTable").DataTable();
-        } catch (err) {
-          alert(err.message);
-        }
+      } catch (e) {
+        localStorage.removeItem("token");
+        window.location.href = "admin-login.html";
       }
+    })();
 
-      document.addEventListener("DOMContentLoaded", async () => {
-        const decoded = jwt_decode(token);
-        const exp = decoded.exp * 1000;
-        const totalDuration = exp - Date.now();
-        const timerText = document.getElementById("sessionTimerText");
-        const timerProgress = document.getElementById("sessionTimerProgress");
+    const token = localStorage.getItem("token");
 
-        function updateTimer() {
-          const timeLeft = Math.max(exp - Date.now(), 0);
-          const mins = Math.floor(timeLeft / 60000);
-          const secs = Math.floor((timeLeft % 60000) / 1000);
-          timerText.textContent = `Session expires in: ${mins}m ${secs}s`;
-          timerProgress.style.width = (timeLeft / totalDuration) * 100 + "%";
-          if (timeLeft <= 0) {
-            alert("Session expired.");
-            localStorage.removeItem("token");
-            window.location.href = "admin-login.html";
-          }
+    async function loadProducts() {
+      try {
+        showLoader();
+        const res = await fetch(`${backendUrl}/api/products`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to fetch products.");
+        const products = await res.json();
+
+        const tableBody = document.getElementById("productTableBody");
+        tableBody.innerHTML = "";
+
+        products.forEach(product => {
+          const availability = product.availability || "In Stock";
+          const tr = document.createElement("tr");
+          tr.id = `row-${product.id}`;
+          tr.innerHTML = `
+            <td><img src="${backendUrl}${product.thumbnail}" class="img-fluid" alt="product"/></td>
+            <td>${product.name}</td>
+            <td>${product.category || ""}</td>
+            <td>${product.quantity || 0}</td>
+            <td>₦${(+product.price || 0).toFixed(2)}</td>
+            <td class="${availability === 'In Stock' ? 'status-available' : 'status-unavailable'}">${availability}</td>
+            <td>
+              <ul class="option-links">
+                <li><a href="javascript:void(0)" onclick='openEditModal(${JSON.stringify(product)})'><i class="ri-pencil-line"></i></a></li>
+                <li><a href="javascript:void(0)" onclick="deleteProduct('${product.id}')"><i class="ri-delete-bin-line"></i></a></li>
+              </ul>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        if ($.fn.DataTable.isDataTable("#productTable")) {
+          $("#productTable").DataTable().destroy();
         }
-        updateTimer();
-        setInterval(updateTimer, 1000);
+        $("#productTable").DataTable();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        hideLoader();
+      }
+    }
 
-        // Load products initially
+    document.addEventListener("DOMContentLoaded", () => {
+      loadProducts();
+    });
+
+    async function deleteProduct(id) {
+      if (!confirm("Are you sure?")) return;
+      try {
+        const res = await fetch(`${backendUrl}/api/products/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to delete product.");
+        document.getElementById(`row-${id}`).remove();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function openEditModal(product) {
+      document.getElementById("editProductId").value = product.id;
+      document.getElementById("editProductName").value = product.name;
+      document.getElementById("editProductPrice").value = product.price;
+      document.getElementById("editProductQuantity").value = product.quantity || 0;
+      document.getElementById("editProductAvailability").value = product.availability || "In Stock";
+      const modal = new bootstrap.Modal(document.getElementById("editProductModal"));
+      modal.show();
+    }
+
+    document.getElementById("editProductForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("editProductId").value;
+      const formData = new FormData(e.target);
+      try {
+        const res = await fetch(`${backendUrl}/api/products/${id}`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        if (!res.ok) throw new Error("Failed to update product.");
         await loadProducts();
-
-        // Sidebar toggle
-        const navItem = document.querySelector(".nav-item.active");
-        navItem.addEventListener("click", () => {
-          const ul = navItem.querySelector("ul");
-          ul.style.display = ul.style.display === "block" ? "none" : "block";
-        });
-
-        // Dropdown toggle
-        const userMenu = document.querySelector(".user-menu");
-        userMenu.addEventListener("click", () => {
-          const dropdown = userMenu.querySelector(".dropdown-menu");
-          dropdown.style.display =
-            dropdown.style.display === "block" ? "none" : "block";
-        });
-      });
-
-      async function deleteProduct(id) {
-        if (!confirm("Are you sure?")) return;
-        const token = localStorage.getItem("token");
-        try {
-          const res = await fetch(`${backendUrl}/api/products/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) throw new Error("Failed to delete product.");
-          alert("Deleted!");
-          document.getElementById(`row-${id}`).remove();
-        } catch (err) {
-          alert(err.message);
-        }
+        bootstrap.Modal.getInstance(document.getElementById("editProductModal")).hide();
+      } catch (err) {
+        alert(err.message);
       }
-
-      function openEditModal(product) {
-        document.getElementById("editProductId").value = product.id;
-        document.getElementById("editProductName").value = product.name;
-        document.getElementById("editProductPrice").value = product.price;
-        document.getElementById("editProductQuantity").value =
-          product.quantity || 0;
-        document.getElementById("editProductAvailability").value =
-          product.availability || "In Stock";
-
-        const modal = new bootstrap.Modal(
-          document.getElementById("editProductModal")
-        );
-        modal.show();
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById("editProductForm");
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const token = localStorage.getItem("token");
-          const id = document.getElementById("editProductId").value;
-          const formData = new FormData(form);
-
-          try {
-            const res = await fetch(`${backendUrl}/api/products/${id}`, {
-              method: "PUT",
-              headers: { Authorization: `Bearer ${token}` },
-              body: formData,
-            });
-            if (!res.ok) {
-              const data = await res.json();
-              throw new Error(data.error || "Update failed.");
-            }
-            alert("Updated!");
-            await loadProducts();
-            bootstrap.Modal.getInstance(
-              document.getElementById("editProductModal")
-            ).hide();
-          } catch (err) {
-            alert(err.message);
-          }
-        });
-      });
-    </script>
-    <!-- <script>
-        function jwt_decode(token) {
-            // Placeholder: Decodes a base64 part of a JWT. Assumes a valid token structure.
-            try {
-                const payload = token.split('.')[1];
-                const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                const decoded = JSON.parse(jsonPayload);
-                // Set a fake expiry 1 hour from now for testing the timer
-                if (!decoded.exp) {
-                    decoded.exp = (Date.now() / 1000) + 3600; 
-                }
-                return decoded;
-            } catch (e) {
-                console.error("JWT Decode Error:", e);
-                return { exp: 0 }; // Return expired if failed to parse
-            }
-        }
-    </script>
-
-    <script>
-        const backendUrl = "https://nees-1.onrender.com";
-
-        // Auth check
-        (function() {
-          // --- BEGINNING OF AUTH CHECK ---
-          const token = localStorage.getItem("token");
-          if (!token) {
-              // Note: For live testing, set a dummy token in localStorage for the script to run
-              // localStorage.setItem("token", "a.eyJleHAiOjE2NzIyMjc3MDAsImlhdCI6MTY3MjIyNDExNn0.b");
-              // window.location.href = "admin-login.html"; 
-              console.warn("No token found. Using dummy token for visualization.");
-              localStorage.setItem("token", "dummy.eyJleHAiOjI1Mzc4MzY0MDAsImlhdCI6MTY3MjIyNDExNn0.token"); 
-          }
-          let token = localStorage.getItem("token"); // Re-read potentially set dummy token
-          try {
-            const decoded = jwt_decode(token);
-            if (Date.now() > decoded.exp * 1000) {
-              localStorage.removeItem("token");
-              // window.location.href = "admin-login.html";
-            }
-          } catch (e) {
-            localStorage.removeItem("token");
-            // window.location.href = "admin-login.html";
-          }
-          // --- END OF AUTH CHECK ---
-        })();
-
-        // Global variables
-        let token = localStorage.getItem("token");
-
-        async function loadProducts() {
-          try {
-            const res = await fetch(`${backendUrl}/api/products`, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error("Failed to fetch products.");
-            
-            // --- DUMMY DATA FOR VISUALIZATION IF API FAILS ---
-            let products = await res.json();
-            if (products.length === 0) {
-                products = [
-                    { id: 'p1', name: 'Asta Biscuit', category: 'Biscuit', quantity: 12, price: 95.97, thumbnail: '/img/dummy/biscuit.jpg', availability: 'Approved' },
-                    { id: 'p2', name: 'Cold Brew Coffee', category: 'Drinks', quantity: 10, price: 95.97, thumbnail: '/img/dummy/coffee.jpg', availability: 'Approved' },
-                    { id: 'p3', name: 'Peanut Butter Cookies', category: 'Cookies', quantity: 9, price: 65.35, thumbnail: '/img/dummy/cookies.jpg', availability: 'Pending' },
-                    { id: 'p4', name: 'Wheat Flakes', category: 'Flakes', quantity: 8, price: 95.97, thumbnail: '/img/dummy/flakes.jpg', availability: 'Pending' },
-                    { id: 'p5', name: 'Potatoes Chips', category: 'Chips', quantity: 23, price: 91.97, thumbnail: '/img/dummy/chips.jpg', availability: 'Approved' }
-                ];
-            }
-            // --- END DUMMY DATA ---
-
-            const tableBody = document.getElementById("productTableBody");
-
-            // Destroy existing DataTable if it exists
-            if ($.fn.DataTable.isDataTable('#productTable')) {
-              $('#productTable').DataTable().destroy();
-            }
-
-            tableBody.innerHTML = "";
-
-            products.forEach(product => {
-              // Mapping 'Approved'/'Pending' status from the image to 'In Stock'/'Out of Stock' for the provided script
-              const statusText = product.availability || (product.quantity > 0 ? "Approved" : "Pending");
-              const statusClass = (statusText === "Approved" || statusText === "In Stock") ? "status-approved" : "status-pending";
-              
-              // Fallback for thumbnail
-              const thumbnailUrl = product.thumbnail && product.thumbnail.includes('http') ? product.thumbnail : `https://via.placeholder.com/50x50?text=${product.name[0]}`;
-
-
-              const tr = document.createElement("tr");
-              tr.id = `row-${product.id}`;
-              tr.innerHTML = `
-                <td>
-                  <div class="table-image">
-                    <img src="${thumbnailUrl}" class="img-fluid" alt="product"/>
-                  </div>
-                </td>
-                <td>${product.name}</td>
-                <td class="category-link">${product.category || ""}</td>
-                <td>${product.quantity || 0}</td>
-                <td>₦${(+product.price || 0).toFixed(2)}</td>
-                <td class="${statusClass}">
-                  <span>${statusText}</span>
-                </td>
-                <td class="option-links">
-                  <a href="#"><i class="ri-pencil-line"></i></a>
-                  <a href="#"><i class="ri-delete-bin-line"></i></a>
-                </td>
-              `;
-              tableBody.appendChild(tr);
-            });
-
-            $("#productTable").DataTable({
-                "searching": true,
-                "paging": true,
-                "info": true,
-                "order": [[1, "asc"]] // Order by Product Name by default
-            });
-            // Hide the default search box that DataTable adds, as we have a custom one in the header
-            $('#productTable_filter').hide();
-
-
-          } catch (err) {
-            console.error(err);
-            const tableBody = document.getElementById("productTableBody");
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red; padding: 20px;">Error fetching products. Displaying dummy data for visualization.</td></tr>`;
-            loadProducts({ useDummy: true }); // Attempt to load dummy data on failure
-          }
-        }
-
-        document.addEventListener("DOMContentLoaded", async () => {
-          // --- Session Timer (Logic retained but visually absent in this HTML) ---
-          const totalDuration = 3600000; // 1 hour for placeholder
-          const exp = (Date.now() + totalDuration);
-
-          function updateTimer() {
-            const timeLeft = Math.max(exp - Date.now(), 0);
-            if (timeLeft <= 0) {
-              // ... session expired logic ...
-            }
-          }
-          updateTimer();
-          setInterval(updateTimer, 1000);
-
-          await loadProducts();
-
-          // Dropdown toggle
-          const userMenu = document.querySelector('.user-menu');
-          userMenu.addEventListener('click', () => {
-            const dropdown = userMenu.querySelector('.dropdown-menu');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-          });
-          
-          // Custom search integration (optional, since DataTable adds its own)
-          $('.search-bar input').on('keyup', function() {
-              $('#productTable').DataTable().search(this.value).draw();
-          });
-        });
-
-        // Delete function (retained from script)
-        async function deleteProduct(id) {
-          if (!confirm("Are you sure?")) return;
-          const token = localStorage.getItem("token");
-          try {
-            const res = await fetch(`${backendUrl}/api/products/${id}`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error("Failed to delete product.");
-            alert("Deleted!");
-            document.getElementById(`row-${id}`).remove();
-          } catch (err) {
-            alert(err.message);
-          }
-        }
-
-        // Edit Modal function (retained from script - note: requires Bootstrap)
-        function openEditModal(product) {
-          document.getElementById("editProductId").value = product.id;
-          document.getElementById("editProductName").value = product.name;
-          document.getElementById("editProductPrice").value = product.price;
-          document.getElementById("editProductQuantity").value = product.quantity || 0;
-          document.getElementById("editProductAvailability").value = product.availability || "Approved";
-
-          const modal = new bootstrap.Modal(document.getElementById("editProductModal"));
-          modal.show();
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-          const form = document.getElementById("editProductForm");
-          form.addEventListener("submit", async e => {
-            e.preventDefault();
-            // ... update logic ...
-          });
-        });
-    </script> -->
-  </body>
+    });
+  </script>
+</body>
 </html>

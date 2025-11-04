@@ -777,18 +777,23 @@ app.get("/api/products", (req, res) => {
   try {
     const stmt = db.prepare("SELECT * FROM products;");
     const products = [];
-    while (stmt.step()) {
-      const row = stmt.getAsObject();
-      row.images = JSON.parse(row.images || "[]");
-      row.price = Number(row.price);
-      products.push(row);
+
+    for (const row of stmt.iterate()) {
+      products.push({
+        ...row,
+        images: row.images ? JSON.parse(row.images) : [],
+        price: Number(row.price),
+      });
     }
+
     stmt.free();
     res.json(products);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error fetching products:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
+
 
 // --- Updated Product POST Endpoint ---
 app.post(
