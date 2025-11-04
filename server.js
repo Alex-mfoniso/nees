@@ -287,6 +287,10 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import multer from "multer";
 import bodyParser from "body-parser";
+import AWS from "aws-sdk";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -295,18 +299,24 @@ const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
-// ====== Folders for uploads & DB ======
-const uploadFolder = NODE_ENV === "production" ? "/tmp/uploads" : "./uploads";
-const dbPath = NODE_ENV === "production" ? "/tmp/database.db" : "./database.db";
+// ====== S3 Setup ======
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+const S3_BUCKET = process.env.S3_BUCKET;
 
-if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder, { recursive: true });
+// ====== Local temp folder for uploads ======
+const tempUploadFolder = "/tmp/uploads";
+if (!fs.existsSync(tempUploadFolder)) fs.mkdirSync(tempUploadFolder, { recursive: true });
 
 // ====== Middleware ======
-app.use("/uploads", express.static(uploadFolder));
 app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
 app.use(bodyParser.json());
 
 // ====== SQLite DB ======
+const dbPath = "/tmp/database.db";
 const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
@@ -340,10 +350,24 @@ console.log("✅ SQLite DB ready");
 
 // ====== Multer setup ======
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadFolder),
+  destination: (req, file, cb) => cb(null, tempUploadFolder),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
+
+// ====== Helper: upload to S3 ======
+async function uploadToS3(filePath, fileName) {
+  const fileContent = fs.readFileSync(filePath);
+  const params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Body: fileContent,
+    ACL: "public-read",
+  };
+  const data = await s3.upload(params).promise();
+  fs.unlinkSync(filePath); // remove temp file
+  return data.Location; // S3 URL
+}
 
 // ====== Auth Middleware ======
 const authenticate = (req, res, next) => {
@@ -362,9 +386,7 @@ const authenticate = (req, res, next) => {
 };
 
 // ====== Routes ======
-app.get("/", (req, res) => {
-  res.send("API is alive with SQLite on Render!");
-});
+app.get("/", (req, res) => res.send("API is alive with SQLite + S3!"));
 
 // -------- Admin --------
 app.post("/api/admin/register", (req, res) => {
@@ -414,32 +436,45 @@ app.get("/api/products", (req, res) => {
   });
 });
 
-app.post("/api/products", authenticate, upload.fields([{ name: "images", maxCount: 5 }, { name: "thumbnail", maxCount: 1 }]), (req, res) => {
-  const { name, type, description, price, category } = req.body;
+app.post("/api/products", authenticate, upload.fields([{ name: "images", maxCount: 5 }, { name: "thumbnail", maxCount: 1 }]), async (req, res) => {
+  try {
+    const { name, type, description, price, category } = req.body;
+    if (!name || !price || !category) return res.status(400).json({ error: "Name, price, category required" });
 
-  if (!name || !price || !category)
-    return res.status(400).json({ error: "Name, price, and category required" });
+    const uploadedImages = [];
+    if (req.files["images"]) {
+      for (const f of req.files["images"]) {
+        uploadedImages.push(await uploadToS3(f.path, f.filename));
+      }
+    }
 
-  const images = req.files["images"] ? req.files["images"].map(f => `/uploads/${f.filename}`) : [];
-  const thumbnail = req.files["thumbnail"]?.[0] ? `/uploads/${req.files["thumbnail"][0].filename}` : images[0] || "";
+    let thumbnail = "";
+    if (req.files["thumbnail"]?.[0]) {
+      thumbnail = await uploadToS3(req.files["thumbnail"][0].path, req.files["thumbnail"][0].filename);
+    } else if (uploadedImages.length > 0) {
+      thumbnail = uploadedImages[0];
+    }
 
-  db.run(
-    `INSERT INTO products 
+    db.run(
+      `INSERT INTO products 
       (name, type, description, price, category, tags, exchangeable, refundable, thumbnail, images, availability)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [name, type || "general", description || "", price, category, "[]", 0, 0, thumbnail, JSON.stringify(images), "in stock"],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID });
-    }
-  );
+      [name, type || "general", description || "", price, category, "[]", 0, 0, thumbnail, JSON.stringify(uploadedImages), "in stock"],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id: this.lastID });
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.put("/api/products/:id", authenticate, upload.fields([{ name: "images", maxCount: 5 }, { name: "thumbnail", maxCount: 1 }]), (req, res) => {
+app.put("/api/products/:id", authenticate, upload.fields([{ name: "images", maxCount: 5 }, { name: "thumbnail", maxCount: 1 }]), async (req, res) => {
   const { id } = req.params;
   const { name, price, category } = req.body;
 
-  db.get("SELECT * FROM products WHERE id = ?", [id], (err, product) => {
+  db.get("SELECT * FROM products WHERE id = ?", [id], async (err, product) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!product) return res.status(404).json({ error: "Product not found" });
 
@@ -451,13 +486,14 @@ app.put("/api/products/:id", authenticate, upload.fields([{ name: "images", maxC
     if (category) { updates.push("category = ?"); values.push(category); }
 
     if (req.files["thumbnail"]?.[0]) {
-      updates.push("thumbnail = ?");
-      values.push(`/uploads/${req.files["thumbnail"][0].filename}`);
+      const thumbUrl = await uploadToS3(req.files["thumbnail"][0].path, req.files["thumbnail"][0].filename);
+      updates.push("thumbnail = ?"); values.push(thumbUrl);
     }
 
     if (req.files["images"]?.length > 0) {
-      updates.push("images = ?");
-      values.push(JSON.stringify(req.files["images"].map(f => `/uploads/${f.filename}`)));
+      const imgs = [];
+      for (const f of req.files["images"]) imgs.push(await uploadToS3(f.path, f.filename));
+      updates.push("images = ?"); values.push(JSON.stringify(imgs));
     }
 
     if (updates.length === 0) return res.status(400).json({ error: "No fields to update" });
@@ -477,5 +513,5 @@ app.delete("/api/products/:id", authenticate, (req, res) => {
   });
 });
 
-// ====== Start server ======
+// ====== Start Server ======
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
