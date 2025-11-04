@@ -641,6 +641,7 @@ if (fs.existsSync(DB_FILE)) {
   db = new SQL.Database(fileBuffer);
 } else {
   db = new SQL.Database();
+
   db.run(`
     CREATE TABLE admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -648,22 +649,23 @@ if (fs.existsSync(DB_FILE)) {
       password TEXT
     );
   `);
-  db.run(`
-    CREATE TABLE products (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      type TEXT,
-      description TEXT,
-      price REAL,
-      category TEXT,
-      tags TEXT,
-      exchangeable INTEGER,
-      refundable INTEGER,
-      thumbnail TEXT,
-      images TEXT,
-      availability TEXT
-    );
-  `);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    type TEXT,
+    description TEXT,
+    price REAL,
+    category TEXT,
+    tags TEXT,
+    exchangeable INTEGER,
+    refundable INTEGER,
+    thumbnail TEXT,
+    images TEXT,
+    availability TEXT
+  );
+`);
   fs.writeFileSync(DB_FILE, Buffer.from(db.export()));
 }
 
