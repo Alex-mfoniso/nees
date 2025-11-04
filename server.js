@@ -278,45 +278,63 @@
 // })
 
 
-import path from "path"
-import express from "express"
-import sqlite3 from "sqlite3"
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-import cors from "cors"
-import dotenv from "dotenv"
-import multer from "multer"
-import bodyParser from "body-parser"
+import path from "path";
+import express from "express";
+import bodyParser from "body-parser";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import cors from "cors";
+import multer from "multer";
+import fs from "fs";
+import initSqlJs from "sql.js";
 
-dotenv.config()
-const app = express()
+const app = express();
 
-// Static uploads
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")))
+// ======================
+// SETUP
+// ======================
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
+app.use(bodyParser.json());
 
-// CORS
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"]
-  })
-)
+const JWT_SECRET = "supersecretkey"; // Hardcoded since no .env
 
-app.use(bodyParser.json())
+// ======================
+// MULTER FILE UPLOAD
+// ======================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "./uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+});
+const upload = multer({ storage });
 
-// =======================================
-// SQLITE DATABASE
-// =======================================
-const db = new sqlite3.Database("./database.db")
+// ======================
+// SQL.JS DATABASE
+// ======================
+const DB_FILE = "./database.sqlite";
 
-db.serialize(() => {
+let SQL;
+let db;
+
+(async () => {
+  SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
+
+  // Load existing DB or create new
+  if (fs.existsSync(DB_FILE)) {
+    const fileBuffer = fs.readFileSync(DB_FILE);
+    db = new SQL.Database(fileBuffer);
+  } else {
+    db = new SQL.Database();
+  }
+
+  // Initialize tables if not exists
   db.run(`
     CREATE TABLE IF NOT EXISTS admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
       password TEXT
-    )
-  `)
+    );
+  `);
 
   db.run(`
     CREATE TABLE IF NOT EXISTS products (
@@ -332,159 +350,168 @@ db.serialize(() => {
       thumbnail TEXT,
       images TEXT,
       availability TEXT
-    )
-  `)
-})
+    );
+  `);
 
-console.log("✅ SQLite ready")
+  saveDB();
+  console.log("✅ SQL.js database ready");
+})();
 
-// JWT
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey"
-
-// MULTER FILE UPLOAD
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "./uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
-})
-
-const upload = multer({ storage })
-
-// AUTH MIDDLEWARE
-const authenticate = (req, res, next) => {
-  const header = req.headers.authorization
-  if (!header) return res.status(401).json({ error: "Missing token" })
-
-  const token = header.split(" ")[1]
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET)
-    req.admin = decoded
-    next()
-  } catch {
-    res.status(401).json({ error: "Invalid token" })
-  }
+// ======================
+// HELPERS
+// ======================
+function saveDB() {
+  const data = db.export();
+  fs.writeFileSync(DB_FILE, Buffer.from(data));
 }
 
-// ROOT ROUTE
+// ======================
+// AUTH MIDDLEWARE
+// ======================
+const authenticate = (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "Missing token" });
+
+  const token = header.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
+
+// ======================
+// ROOT
+// ======================
 app.get("/", (req, res) => {
-  res.send("API is alive with SQLite")
-})
+  res.send("API is alive with SQL.js");
+});
 
-// ================= ADMIN =================
+// ======================
+// ADMIN ROUTES
+// ======================
 app.post("/api/admin/register", (req, res) => {
-  const { username, password } = req.body
+  const { username, password } = req.body;
   if (!username || !password)
-    return res.status(400).json({ error: "Username and password required" })
+    return res.status(400).json({ error: "Username and password required" });
 
-  const hashed = bcrypt.hashSync(password, 10)
+  const hashed = bcrypt.hashSync(password, 10);
 
-  db.run(
-    "INSERT INTO admins (username, password) VALUES (?, ?)",
-    [username, hashed],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message })
-      res.json({ message: "Admin created", id: this.lastID })
-    }
-  )
-})
+  try {
+    const stmt = db.prepare("INSERT INTO admins (username, password) VALUES (?, ?)");
+    stmt.run([username, hashed]);
+    stmt.free();
+    saveDB();
+    res.json({ message: "Admin created" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.post("/api/admin/login", (req, res) => {
-  const { username, password } = req.body
+  const { username, password } = req.body;
 
-  db.get(
-    "SELECT * FROM admins WHERE username = ?",
-    [username],
-    async (err, admin) => {
-      if (err) return res.status(500).json({ error: err.message })
-      if (!admin) return res.status(400).json({ error: "Invalid credentials" })
+  try {
+    const stmt = db.prepare("SELECT * FROM admins WHERE username = ?");
+    stmt.bind([username]);
+    if (!stmt.step()) return res.status(400).json({ error: "Invalid credentials" });
 
-      const isValid = await bcrypt.compare(password, admin.password)
-      if (!isValid) return res.status(400).json({ error: "Invalid credentials" })
+    const admin = stmt.getAsObject();
+    stmt.free();
 
-      const token = jwt.sign(
-        { id: admin.id, username: admin.username },
-        JWT_SECRET,
-        { expiresIn: "2h" }
-      )
+    const isValid = bcrypt.compareSync(password, admin.password);
+    if (!isValid) return res.status(400).json({ error: "Invalid credentials" });
 
-      res.json({ token })
-    }
-  )
-})
+    const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, {
+      expiresIn: "2h"
+    });
 
-// ================= PRODUCTS =================
-app.get("/api/products", (req, res) => {
-  db.all("SELECT * FROM products", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message })
-
-    const products = rows.map(p => ({
-      ...p,
-      price: Number(p.price),
-      images: JSON.parse(p.images || "[]")
-    }))
-
-    res.json(products)
-  })
-})
-
-app.post(
-  "/api/products",
-  authenticate,
-  upload.fields([
-    { name: "images", maxCount: 5 },
-    { name: "thumbnail", maxCount: 1 }
-  ]),
-  (req, res) => {
-    const { name, type, description, price, category } = req.body
-
-    if (!name || !price || !category)
-      return res
-        .status(400)
-        .json({ error: "Name, price and category are required" })
-
-    let images = []
-    if (req.files["images"]) {
-      images = req.files["images"].map(f => `/uploads/${f.filename}`)
-    }
-
-    const thumbnail =
-      req.files["thumbnail"]?.[0]
-        ? `/uploads/${req.files["thumbnail"][0].filename}`
-        : images[0] || ""
-
-    db.run(
-      `INSERT INTO products 
-      (name, type, description, price, category, tags, exchangeable, refundable, thumbnail, images, availability)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        name,
-        type || "general",
-        description || "",
-        price,
-        category,
-        "[]",
-        0,
-        0,
-        thumbnail,
-        JSON.stringify(images),
-        "in stock"
-      ],
-      function (err) {
-        if (err) return res.status(500).json({ error: err.message })
-        res.json({ id: this.lastID })
-      }
-    )
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-)
+});
+
+// ======================
+// PRODUCTS ROUTES
+// ======================
+app.get("/api/products", (req, res) => {
+  try {
+    const stmt = db.prepare("SELECT * FROM products");
+    const products = [];
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      row.price = Number(row.price);
+      row.images = JSON.parse(row.images || "[]");
+      products.push(row);
+    }
+    stmt.free();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/products", authenticate, upload.fields([
+  { name: "images", maxCount: 5 },
+  { name: "thumbnail", maxCount: 1 }
+]), (req, res) => {
+  const { name, type, description, price, category } = req.body;
+
+  if (!name || !price || !category)
+    return res.status(400).json({ error: "Name, price and category required" });
+
+  let images = [];
+  if (req.files["images"]) images = req.files["images"].map(f => `/uploads/${f.filename}`);
+  const thumbnail = req.files["thumbnail"]?.[0] ? `/uploads/${req.files["thumbnail"][0].filename}` : images[0] || "";
+
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO products 
+      (name, type, description, price, category, tags, exchangeable, refundable, thumbnail, images, availability)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    stmt.run([
+      name,
+      type || "general",
+      description || "",
+      price,
+      category,
+      "[]",
+      0,
+      0,
+      thumbnail,
+      JSON.stringify(images),
+      "in stock"
+    ]);
+
+    stmt.free();
+    saveDB();
+    res.json({ message: "Product created" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.delete("/api/products/:id", authenticate, (req, res) => {
-  db.run("DELETE FROM products WHERE id = ?", [req.params.id], err => {
-    if (err) return res.status(500).json({ error: err.message })
-    res.json({ message: "Product deleted" })
-  })
-})
+  try {
+    const stmt = db.prepare("DELETE FROM products WHERE id = ?");
+    stmt.run([req.params.id]);
+    stmt.free();
+    saveDB();
+    res.json({ message: "Product deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-const PORT = process.env.PORT || 5000
+// ======================
+// START SERVER
+// ======================
+const PORT = 5000;
 app.listen(PORT, () => {
-  console.log("✅ Server running on port " + PORT)
-})
+  console.log("✅ Server running on port " + PORT);
+});
