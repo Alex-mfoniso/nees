@@ -452,7 +452,6 @@
 // const PORT = 5000;
 // app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 
-
 import path from "path";
 import express from "express";
 import bodyParser from "body-parser";
@@ -460,7 +459,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import multer from "multer";
-import { Pool } from 'pg'; // <-- NEW: Import PostgreSQL Pool
+import { Pool } from "pg"; // <-- NEW: Import PostgreSQL Pool
 import fs from "fs";
 // import initSqlJs from "sql.js"; // <-- REMOVE: No longer needed
 
@@ -474,30 +473,31 @@ const JWT_SECRET = "supersecretkey";
 // Use a persistent connection URL from your hosting environment (e.g., Render)
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
-    console.error("❌ FATAL: DATABASE_URL environment variable is not set.");
-    process.exit(1);
+  console.error("❌ FATAL: DATABASE_URL environment variable is not set.");
+  process.exit(1);
 }
 
 // Create a connection pool (recommended for web servers)
 // Create a connection pool
 const pool = new Pool({
-    connectionString,
-    // ADD/UPDATE THIS SECTION:
-    ssl: {
-        // This tells Node.js to accept the self-signed certificate
-        rejectUnauthorized: false
-    }
+  connectionString,
+  // ADD/UPDATE THIS SECTION:
+  ssl: {
+    // This tells Node.js to accept the self-signed certificate
+    rejectUnauthorized: false,
+    checkServerIdentity: () => null,
+  },
 });
 
 // ==========================
 // DB Initialization Function
 // ==========================
 async function initDb() {
-    try {
-        const client = await pool.connect();
+  try {
+    const client = await pool.connect();
 
-        // 1. Create Admins Table
-        await client.query(`
+    // 1. Create Admins Table
+    await client.query(`
             CREATE TABLE IF NOT EXISTS admins (
                 id SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
@@ -505,8 +505,8 @@ async function initDb() {
             );
         `);
 
-        // 2. Create Products Table
-        await client.query(`
+    // 2. Create Products Table
+    await client.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -522,33 +522,33 @@ async function initDb() {
                 availability TEXT
             );
         `);
-        client.release();
-        console.log("✅ PostgreSQL tables ensured.");
-    } catch (err) {
-        console.error("❌ Error initializing PostgreSQL database:", err);
-        // It's crucial to exit if the DB can't be reached
-        process.exit(1);
-    }
+    client.release();
+    console.log("✅ PostgreSQL tables ensured.");
+  } catch (err) {
+    console.error("❌ Error initializing PostgreSQL database:", err);
+    // It's crucial to exit if the DB can't be reached
+    process.exit(1);
+  }
 }
 
 // ==========================
 // DIRECTORY SETUP (Kept for Multer/Images)
 // ==========================
-const uploadDir = path.join(process.cwd(), 'uploads');
+const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // ==========================
 // MULTER CONFIG (Kept as is)
 // ==========================
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const extension = path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix + extension);
-    },
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const extension = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + extension);
+  },
 });
 const upload = multer({ storage });
 
@@ -558,27 +558,27 @@ const upload = multer({ storage });
 app.use("/uploads", express.static(uploadDir));
 app.use(bodyParser.json());
 app.use(
-    cors({
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "DELETE"],
-    })
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
 );
 
 // ==========================
 // AUTH MIDDLEWARE (Kept as is)
 // ==========================
 const authenticate = (req, res, next) => {
-    const header = req.headers.authorization;
-    if (!header) return res.status(401).json({ error: "Missing token" });
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "Missing token" });
 
-    const token = header.split(" ")[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.admin = decoded;
-        next();
-    } catch {
-        res.status(401).json({ error: "Invalid token" });
-    }
+  const token = header.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
 };
 
 // ==========================
@@ -592,63 +592,67 @@ app.get("/", (req, res) => res.send("API alive with PostgreSQL"));
 
 // REGISTER (Rewritten for PostgreSQL)
 app.post("/api/admin/register", async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password)
-        return res.status(400).json({ error: "Username and password required" });
+  const { username, password } = req.body;
+  if (!username || !password)
+    return res.status(400).json({ error: "Username and password required" });
 
-    const hashed = bcrypt.hashSync(password, 10);
+  const hashed = bcrypt.hashSync(password, 10);
 
-    try {
-        const result = await pool.query(
-            "INSERT INTO admins (username, password) VALUES ($1, $2) RETURNING id;",
-            [username, hashed]
-        );
-        res.status(201).json({ message: "Admin created", id: result.rows[0].id });
-    } catch (err) {
-        if (err.code === '23505') { // PostgreSQL unique violation error code
-            res.status(400).json({ error: "Username already exists" });
-        } else {
-            console.error("Admin registration error:", err);
-            res.status(500).json({ error: err.message });
-        }
+  try {
+    const result = await pool.query(
+      "INSERT INTO admins (username, password) VALUES ($1, $2) RETURNING id;",
+      [username, hashed]
+    );
+    res.status(201).json({ message: "Admin created", id: result.rows[0].id });
+  } catch (err) {
+    if (err.code === "23505") {
+      // PostgreSQL unique violation error code
+      res.status(400).json({ error: "Username already exists" });
+    } else {
+      console.error("Admin registration error:", err);
+      res.status(500).json({ error: err.message });
     }
+  }
 });
 
 // LOGIN (Rewritten for PostgreSQL)
 app.post("/api/admin/login", async (req, res) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ error: "Username and password required" });
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password required" });
+  }
+
+  try {
+    const trimmedUsername = username.trim();
+
+    const result = await pool.query(
+      "SELECT * FROM admins WHERE username = $1;",
+      [trimmedUsername]
+    );
+    const admin = result.rows[0];
+
+    if (!admin || !admin.password) {
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    try {
-        const trimmedUsername = username.trim();
+    const isValid = bcrypt.compareSync(password.trim(), admin.password);
 
-        const result = await pool.query("SELECT * FROM admins WHERE username = $1;", [trimmedUsername]);
-        const admin = result.rows[0];
-
-        if (!admin || !admin.password) {
-            return res.status(400).json({ error: "Invalid credentials" });
-        }
-
-        const isValid = bcrypt.compareSync(password.trim(), admin.password);
-
-        if (!isValid) {
-            return res.status(400).json({ error: "Invalid credentials" });
-        }
-
-        const token = jwt.sign(
-            { id: admin.id, username: admin.username },
-            JWT_SECRET,
-            { expiresIn: "2h" }
-        );
-
-        res.json({ token });
-    } catch (err) {
-        console.error("Login error:", err);
-        res.status(500).json({ error: err.message });
+    if (!isValid) {
+      return res.status(400).json({ error: "Invalid credentials" });
     }
+
+    const token = jwt.sign(
+      { id: admin.id, username: admin.username },
+      JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================
@@ -657,205 +661,215 @@ app.post("/api/admin/login", async (req, res) => {
 
 // POST new product (Rewritten for PostgreSQL)
 app.post(
-    "/api/products",
-    authenticate,
-    upload.fields([
-        { name: "images", maxCount: 5 },
-        { name: "thumbnailImage", maxCount: 1 },
-    ]),
-    async (req, res) => {
-        const { productName, type, description, price, category } = req.body;
+  "/api/products",
+  authenticate,
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "thumbnailImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { productName, type, description, price, category } = req.body;
 
-        if (!productName || !price || !category)
-            return res.status(400).json({ error: "Product Name, price and category required" });
+    if (!productName || !price || !category)
+      return res
+        .status(400)
+        .json({ error: "Product Name, price and category required" });
 
-        const images = req.files["images"]?.map((f) => `/uploads/${f.filename}`) || [];
-        const thumbnail = req.files["thumbnailImage"]?.[0]
-            ? `/uploads/${req.files["thumbnailImage"][0].filename}`
-            : images[0] || "";
+    const images =
+      req.files["images"]?.map((f) => `/uploads/${f.filename}`) || [];
+    const thumbnail = req.files["thumbnailImage"]?.[0]
+      ? `/uploads/${req.files["thumbnailImage"][0].filename}`
+      : images[0] || "";
 
-        try {
-            const parsedPrice = parseFloat(price);
-            if (isNaN(parsedPrice)) {
-                return res.status(400).json({ error: "Price must be a valid number." });
-            }
+    try {
+      const parsedPrice = parseFloat(price);
+      if (isNaN(parsedPrice)) {
+        return res.status(400).json({ error: "Price must be a valid number." });
+      }
 
-            const query = `
+      const query = `
                 INSERT INTO products 
                 (name, type, description, price, category, tags, exchangeable, refundable, thumbnail, images, availability)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 RETURNING id;
             `;
 
-            const values = [
-                productName,
-                type || "general",
-                description || "",
-                parsedPrice,
-                category,
-                "[]", // Tags as JSON string in TEXT column
-                req.body.exchangeable === '1' ? 1 : 0,
-                req.body.refundable === '1' ? 1 : 0,
-                thumbnail,
-                JSON.stringify(images), // Images array stored as JSON string
-                "in stock",
-            ];
+      const values = [
+        productName,
+        type || "general",
+        description || "",
+        parsedPrice,
+        category,
+        "[]", // Tags as JSON string in TEXT column
+        req.body.exchangeable === "1" ? 1 : 0,
+        req.body.refundable === "1" ? 1 : 0,
+        thumbnail,
+        JSON.stringify(images), // Images array stored as JSON string
+        "in stock",
+      ];
 
-            await pool.query(query, values);
-            res.status(201).json({ message: "Product created successfully" });
-        } catch (err) {
-            console.error("Product POST DB Error:", err);
-            res.status(500).json({ error: err.message });
-        }
+      await pool.query(query, values);
+      res.status(201).json({ message: "Product created successfully" });
+    } catch (err) {
+      console.error("Product POST DB Error:", err);
+      res.status(500).json({ error: err.message });
     }
+  }
 );
 
 // GET all products (Rewritten for PostgreSQL)
 app.get("/api/products", async (req, res) => {
-    try {
-        const result = await pool.query("SELECT * FROM products ORDER BY id DESC;");
-        
-        const products = result.rows.map(row => {
-            let images = [];
-            try {
-                // Ensure the images column is parsed from JSON TEXT
-                images = row.images ? JSON.parse(row.images) : [];
-            } catch (e) {
-                console.warn(`Invalid images JSON for product ${row.id}:`, row.images);
-                images = [];
-            }
+  try {
+    const result = await pool.query("SELECT * FROM products ORDER BY id DESC;");
 
-            let price = Number(row.price);
-            if (isNaN(price)) price = 0;
+    const products = result.rows.map((row) => {
+      let images = [];
+      try {
+        // Ensure the images column is parsed from JSON TEXT
+        images = row.images ? JSON.parse(row.images) : [];
+      } catch (e) {
+        console.warn(`Invalid images JSON for product ${row.id}:`, row.images);
+        images = [];
+      }
 
-            return {
-                id: row.id,
-                name: row.name || "Unnamed Product",
-                category: row.category || "Uncategorized",
-                quantity: row.quantity != null ? row.quantity : 0,
-                availability: row.availability || "In Stock",
-                images,
-                price,
-                thumbnail: row.thumbnail || "",
-            };
-        });
+      let price = Number(row.price);
+      if (isNaN(price)) price = 0;
 
-        res.json(products);
-    } catch (err) {
-        console.error("Error fetching products:", err);
-        res.status(500).json({ error: "Failed to fetch products" });
-    }
+      return {
+        id: row.id,
+        name: row.name || "Unnamed Product",
+        category: row.category || "Uncategorized",
+        quantity: row.quantity != null ? row.quantity : 0,
+        availability: row.availability || "In Stock",
+        images,
+        price,
+        thumbnail: row.thumbnail || "",
+      };
+    });
+
+    res.json(products);
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
 });
 
 // PUT update product (Rewritten for PostgreSQL)
 app.put(
-    "/api/products/:id",
-    authenticate,
-    upload.fields([
-        { name: "images", maxCount: 5 },
-        { name: "thumbnail", maxCount: 1 },
-    ]),
-    async (req, res) => {
-        const { id } = req.params;
-        const {
-            productName,
-            type,
-            description,
-            price,
-            category,
-            tags,
-            exchangeable,
-            refundable,
-        } = req.body;
+  "/api/products/:id",
+  authenticate,
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "thumbnail", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { id } = req.params;
+    const {
+      productName,
+      type,
+      description,
+      price,
+      category,
+      tags,
+      exchangeable,
+      refundable,
+    } = req.body;
 
-        const fields = [];
-        const values = [];
-        let paramCount = 1;
+    const fields = [];
+    const values = [];
+    let paramCount = 1;
 
-        const addField = (fieldName, value) => {
-            fields.push(`${fieldName} = $${paramCount++}`);
-            values.push(value);
-        };
+    const addField = (fieldName, value) => {
+      fields.push(`${fieldName} = $${paramCount++}`);
+      values.push(value);
+    };
 
-        if (productName) addField("name", productName);
-        if (type) addField("type", type);
-        if (description) addField("description", description);
-        if (price) addField("price", parseFloat(price));
-        if (category) addField("category", category);
-        if (tags) addField("tags", tags);
-        if (exchangeable !== undefined) addField("exchangeable", exchangeable);
-        if (refundable !== undefined) addField("refundable", refundable);
+    if (productName) addField("name", productName);
+    if (type) addField("type", type);
+    if (description) addField("description", description);
+    if (price) addField("price", parseFloat(price));
+    if (category) addField("category", category);
+    if (tags) addField("tags", tags);
+    if (exchangeable !== undefined) addField("exchangeable", exchangeable);
+    if (refundable !== undefined) addField("refundable", refundable);
 
-        if (req.files["thumbnail"]?.[0]) {
-            addField("thumbnail", `/uploads/${req.files["thumbnail"][0].filename}`);
-        }
-        if (req.files["images"]?.length > 0) {
-            const imgs = req.files["images"].map((f) => `/uploads/${f.filename}`);
-            addField("images", JSON.stringify(imgs));
-        }
-
-        if (fields.length === 0)
-            return res.status(400).json({ error: "No fields to update" });
-
-        addField("availability", "in stock"); // Always update status on change
-
-        values.push(id); // ID is the last parameter
-
-        try {
-            const query = `UPDATE products SET ${fields.join(", ")} WHERE id = $${paramCount};`;
-            const result = await pool.query(query, values);
-
-            if (result.rowCount === 0) {
-                return res.status(404).json({ error: "Product not found" });
-            }
-            res.json({ message: "Product updated successfully" });
-        } catch (err) {
-            console.error("Product PUT DB Error:", err);
-            res.status(500).json({ error: err.message });
-        }
+    if (req.files["thumbnail"]?.[0]) {
+      addField("thumbnail", `/uploads/${req.files["thumbnail"][0].filename}`);
     }
+    if (req.files["images"]?.length > 0) {
+      const imgs = req.files["images"].map((f) => `/uploads/${f.filename}`);
+      addField("images", JSON.stringify(imgs));
+    }
+
+    if (fields.length === 0)
+      return res.status(400).json({ error: "No fields to update" });
+
+    addField("availability", "in stock"); // Always update status on change
+
+    values.push(id); // ID is the last parameter
+
+    try {
+      const query = `UPDATE products SET ${fields.join(
+        ", "
+      )} WHERE id = $${paramCount};`;
+      const result = await pool.query(query, values);
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json({ message: "Product updated successfully" });
+    } catch (err) {
+      console.error("Product PUT DB Error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  }
 );
 
 // DELETE product (Rewritten for PostgreSQL)
 app.delete("/api/products/:id", authenticate, async (req, res) => {
-    try {
-        const result = await pool.query("DELETE FROM products WHERE id = $1;", [req.params.id]);
-        
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: "Product not found" });
-        }
-        res.json({ message: "Product deleted" });
-    } catch (err) {
-        console.error("Product DELETE DB Error:", err);
-        res.status(500).json({ error: err.message });
+  try {
+    const result = await pool.query("DELETE FROM products WHERE id = $1;", [
+      req.params.id,
+    ]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Product not found" });
     }
+    res.json({ message: "Product deleted" });
+  } catch (err) {
+    console.error("Product DELETE DB Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET product count for debugging (Rewritten for PostgreSQL)
 app.get("/debug/product-count", async (req, res) => {
-    try {
-        const result = await pool.query("SELECT COUNT(*) AS count FROM products;");
-        const count = result.rows[0].count;
+  try {
+    const result = await pool.query("SELECT COUNT(*) AS count FROM products;");
+    const count = result.rows[0].count;
 
-        res.json({
-            status: "OK",
-            productCount: parseInt(count),
-            message: "Data is retrieved directly from the persistent PostgreSQL database.",
-        });
-    } catch (err) {
-        console.error("Error during product count debug:", err);
-        res.status(500).json({ error: "Failed to read database for count: " + err.message });
-    }
+    res.json({
+      status: "OK",
+      productCount: parseInt(count),
+      message:
+        "Data is retrieved directly from the persistent PostgreSQL database.",
+    });
+  } catch (err) {
+    console.error("Error during product count debug:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to read database for count: " + err.message });
+  }
 });
 
 app.get("/debug/admins", async (req, res) => {
-    try {
-        const result = await pool.query("SELECT id, username FROM admins;");
-        res.json(result.rows);
-    } catch (err) {
-        console.error("Error fetching admins debug:", err);
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const result = await pool.query("SELECT id, username FROM admins;");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching admins debug:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================
@@ -865,5 +879,5 @@ const PORT = process.env.PORT || 5000;
 
 // Initialize DB, then start server
 initDb().then(() => {
-    app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+  app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 });
