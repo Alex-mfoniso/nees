@@ -11,9 +11,9 @@ body {
   color: #333;
   line-height: 1.6;
 }
-/* --- New/Revised CSS for Mobile Sidebar Display --- */
 
-/* Hamburger Button Styling */
+/* --- HAMBURGER & SLIDEOUT MENU STYLES --- */
+
 .hamburger-btn {
   background: none;
   border: none;
@@ -23,75 +23,10 @@ body {
   padding: 5px;
   display: none; /* Hide by default on desktop */
   margin-left: auto; /* Push to the right */
+  z-index: 1010; 
 }
 
-/* Sidebar Specific Changes for Mobile */
-@media (max-width: 900px) {
-  /* 1. Dashboard layout change: stacks content */
-  .dashboard-container {
-    grid-template-columns: 1fr; /* Sidebar stacks on top */
-    position: relative;
-  }
-  
-  /* 2. Sidebar is the mobile menu: starts off-screen */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: -280px; /* Hidden off-screen by default */
-    bottom: 0;
-    z-index: 1000;
-    width: 280px;
-    padding: 20px;
-    transition: left 0.3s ease-in-out; /* Smooth transition */
-    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
-    /* Revert the previous mobile rules for the sidebar and logo: */
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-
-  /* Show the mobile close button */
-  .sidebar .hamburger-btn {
-    display: block; 
-  }
-
-  /* 3. State: Menu is OPEN (.show class added by JS) */
-  .sidebar.show {
-    left: 0; /* Slide sidebar into view */
-  }
-
-  /* 4. Overlay for open state (Optional: makes background dim) */
-  /* If you want an overlay, you'll need JS to inject a div or style the body/main */
-
-  /* 5. Hamburger Button to OPEN the menu (usually in the header) */
-  /* Since the button is now inside the sidebar for closing, we need one for opening. */
-  /* Let's put a separate opener button in the top-header on mobile. */
-  .top-header {
-    /* Ensure the hamburger button is visible in the header on mobile */
-    flex-direction: row; 
-    align-items: center;
-    padding: 15px 20px;
-  }
-  
-  /* Show the hamburger menu in the top-header on mobile */
-  .top-header .hamburger-btn-open {
-    display: block;
-  }
-  
-  .top-header .search-bar {
-    width: 100%;
-    order: 2; /* Move search bar down */
-    margin-top: 10px;
-  }
-}
-
-/* Ensure the initial hamburger button is hidden on desktop (if you still have it outside the header) */
-@media (min-width: 901px) {
-    .hamburger-btn {
-        display: none !important;
-    }
-}
-
-/* Dashboard Container */
+/* Dashboard Container (Desktop Default) */
 .dashboard-container {
   display: grid;
   grid-template-columns: 280px 1fr; /* Sidebar width and main content */
@@ -99,28 +34,25 @@ body {
   background-color: #f4f6f9;
 }
 
-/* Sidebar */
+/* Sidebar (Desktop Default) */
 .sidebar {
-  background-color: #ffffff;
+  /* --- UPDATED BACKGROUND COLOR --- */
+  background-color: #011018; /* Light Blue Background */
+  /* -------------------------------- */
   padding: 20px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); */
   display: flex;
   flex-direction: column;
-  color: #666;
+  color: #000;
+  transition: left 0.3s ease-in-out; 
 }
 
+/* Logo (Desktop Default) */
 .logo {
   display: flex;
   align-items: center;
   margin-bottom: 40px;
   padding: 10px 0;
-}
-
-.logo img {
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
-  border-radius: 8px;
 }
 
 .logo span {
@@ -129,6 +61,7 @@ body {
   color: #333;
 }
 
+/* Main Navigation (Desktop Default) */
 .main-nav ul {
   list-style: none;
 }
@@ -479,7 +412,7 @@ body {
   overflow: hidden; /* Ensure image fits */
 }
 
-/* Responsive Adjustments */
+/* Responsive Adjustments (Desktop & Tablet) */
 @media (max-width: 1200px) {
   .charts-section,
   .bottom-section {
@@ -487,41 +420,82 @@ body {
   }
 }
 
+/* --- MOBILE RESPONSIVENESS FIX (max-width: 900px) --- */
+
 @media (max-width: 900px) {
-  .dashboard-container {
-    grid-template-columns: 1fr; /* Sidebar stacks on top */
+  
+  /* Show the hamburger button on mobile */
+  .hamburger-btn {
+    display: block; 
   }
+
+  /* 1. Dashboard layout change: Removes grid for sidebar/main. */
+  .dashboard-container {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+  
+  /* 2. Sidebar is the mobile menu: starts off-screen */
   .sidebar {
-    width: 100%;
-    padding: 15px;
-    flex-direction: row;
+    position: fixed;
+    top: 0;
+    left: -280px; /* Hidden off-screen by default */
+    bottom: 0;
+    z-index: 1000;
+    width: 280px;
+    padding: 20px;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    /* Ensure content is vertical in the menu */
+    flex-direction: column; 
+    justify-content: flex-start;
+    /* IMPORTANT for scrolling if links overflow */
+    height: 100vh;
+    overflow-y: auto; 
+  }
+  
+  /* 3. State: Menu is OPEN (.show class added by JS) */
+  .sidebar.show {
+    left: 0; /* Slide sidebar into view */
+  }
+
+  /* Restore logo spacing and layout within the open menu */
+  .sidebar .logo {
+    /* Ensure the logo and close button are on the same line */
+    display: flex; 
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px; 
   }
-  .sidebar .logo {
-    margin-bottom: 0;
-  }
+  
+  /* --- CRITICAL FIX: Ensure the navigation block is visible on mobile --- */
   .sidebar .main-nav {
-    display: none; /* Hide main nav for mobile, could be a hamburger menu */
+      /* Forces the navigation container itself to be visible */
+      display: block !important; 
   }
+
+  /* 4. Main content adjustments */
   .main-content {
-    padding: 20px;
+      padding: 20px;
   }
+  
+  /* 5. Top Header adjustments (to fit hamburger and simplify) */
   .top-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+      justify-content: flex-start; 
+      gap: 15px; 
+      padding: 15px 20px;
+      flex-wrap: wrap; 
   }
-  .search-bar {
-    width: 100%;
+
+  .top-header .search-bar {
+      width: auto; 
+      flex-grow: 1;
   }
-  .header-actions {
-    width: 100%;
-    justify-content: space-around;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+  
+  /* Hide user profile/actions on smaller mobile screens */
+  .top-header .header-actions {
+      display: none; 
   }
+
   .user-profile {
     border-left: none;
     padding-left: 0;
@@ -543,14 +517,13 @@ body {
   .recent-orders th,
   .recent-orders td {
     padding: 8px 10px;
-    font-size: 0.8rem;
+    font-size: 0.8rem; 
   }
   .recent-orders thead th:nth-child(3), /* Hide Price column */
-    .recent-orders tbody td:nth-child(3) {
+  .recent-orders tbody td:nth-child(3) {
     display: none;
   }
 }
-
 /* add */
 /* --- Main Layout --- */
 .dashboard-container {
