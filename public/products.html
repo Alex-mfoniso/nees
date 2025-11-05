@@ -193,8 +193,13 @@
           const tr = document.createElement("tr");
           tr.id = `row-${product.id}`;
           tr.innerHTML = `
-            <td><img src="${backendUrl}${product.thumbnail}" class="img-fluid" alt="product"/></td>
-            <td>${product.name}</td>
+    <td>
+        <img src="${product.thumbnail || '/placeholder.svg'}" 
+             class="img-fluid" 
+             alt="product"
+             style="max-width: 50px; height: auto;" />
+    </td>
+    <td>${product.name}</td>
             <td>${product.category || ""}</td>
             <td>${product.quantity || 0}</td>
             <td>₦${(+product.price || 0).toFixed(2)}</td>
