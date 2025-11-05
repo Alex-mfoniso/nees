@@ -11,6 +11,85 @@ body {
   color: #333;
   line-height: 1.6;
 }
+/* --- New/Revised CSS for Mobile Sidebar Display --- */
+
+/* Hamburger Button Styling */
+.hamburger-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666; /* Match link color */
+  cursor: pointer;
+  padding: 5px;
+  display: none; /* Hide by default on desktop */
+  margin-left: auto; /* Push to the right */
+}
+
+/* Sidebar Specific Changes for Mobile */
+@media (max-width: 900px) {
+  /* 1. Dashboard layout change: stacks content */
+  .dashboard-container {
+    grid-template-columns: 1fr; /* Sidebar stacks on top */
+    position: relative;
+  }
+  
+  /* 2. Sidebar is the mobile menu: starts off-screen */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Hidden off-screen by default */
+    bottom: 0;
+    z-index: 1000;
+    width: 280px;
+    padding: 20px;
+    transition: left 0.3s ease-in-out; /* Smooth transition */
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    /* Revert the previous mobile rules for the sidebar and logo: */
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  /* Show the mobile close button */
+  .sidebar .hamburger-btn {
+    display: block; 
+  }
+
+  /* 3. State: Menu is OPEN (.show class added by JS) */
+  .sidebar.show {
+    left: 0; /* Slide sidebar into view */
+  }
+
+  /* 4. Overlay for open state (Optional: makes background dim) */
+  /* If you want an overlay, you'll need JS to inject a div or style the body/main */
+
+  /* 5. Hamburger Button to OPEN the menu (usually in the header) */
+  /* Since the button is now inside the sidebar for closing, we need one for opening. */
+  /* Let's put a separate opener button in the top-header on mobile. */
+  .top-header {
+    /* Ensure the hamburger button is visible in the header on mobile */
+    flex-direction: row; 
+    align-items: center;
+    padding: 15px 20px;
+  }
+  
+  /* Show the hamburger menu in the top-header on mobile */
+  .top-header .hamburger-btn-open {
+    display: block;
+  }
+  
+  .top-header .search-bar {
+    width: 100%;
+    order: 2; /* Move search bar down */
+    margin-top: 10px;
+  }
+}
+
+/* Ensure the initial hamburger button is hidden on desktop (if you still have it outside the header) */
+@media (min-width: 901px) {
+    .hamburger-btn {
+        display: none !important;
+    }
+}
 
 /* Dashboard Container */
 .dashboard-container {

@@ -16,43 +16,43 @@
   </head>
   <body>
     <div class="dashboard-container">
-      <aside class="sidebar">
-        <div class="logo">
-          <!-- <img
-            src="https://via.placeholder.com/40x40?text=Logo"
-            alt="Neelsolar Logo"
-          /> -->
-          <span>NEESOLAR</span>
-        </div>
-        <nav class="main-nav">
-          <ul>
-            <li class="active">
-              <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
-            </li>
-            <li>
-              <a href="add-new-product.html"
-                ><i class="fas fa-plus-circle"></i> Add Products</a
-              >
-            </li>
-            <li>
-              <a href="products.html"
-                ><i class="fas fa-box-open"></i> Product Stock</a
-              >
-            </li>
-            <li>
-              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+    <aside class="sidebar">
+  <div class="logo">
+    <span>NEESOLAR</span>
+    
+    <button class="hamburger-btn mobile-close" id="hamburger-close">
+      <i class="fas fa-times"></i> 
+    </button>
+  </div>
+  
+  <nav class="main-nav">
+    <ul>
+      <li class="active">
+        <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
+      </li>
+      <li>
+        <a href="add-new-product.html"
+          ><i class="fas fa-plus-circle"></i> Add Products</a
+        >
+      </li>
+      <li>
+        <a href="products.html"
+          ><i class="fas fa-box-open"></i> Product Stock</a
+        >
+      </li>
+      <li>
+        <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </li>
+    </ul>
+  </nav>
+</aside>
 
       <main class="main-content">
-        <header class="">
-          <button class="hamburger-btn" id="hamburger">
-            <i class="fas fa-bars"></i>
-          </button>
-          
-        </header>
+       <header class="top-header">
+  <button class="hamburger-btn hamburger-btn-open" id="hamburger-open">
+    <i class="fas fa-bars"></i>
+  </button>
+  </header>
 
         <section class="stat-cards">
           <div class="card stat-card total-revenue">
@@ -233,14 +233,24 @@
         </section>
       </main>
     </div>
-    <script>
-      // Hamburger menu toggle
-      document
-        .getElementById("hamburger")
-        .addEventListener("click", function () {
-          document.querySelector(".sidebar").classList.toggle("show");
-        });
-    </script>
+   <script>
+  // Select the sidebar element
+  const sidebar = document.querySelector(".sidebar");
+  
+  // 1. OPEN button listener (in the top-header)
+  document
+    .getElementById("hamburger-open")
+    .addEventListener("click", function () {
+      sidebar.classList.add("show");
+    });
+    
+  // 2. CLOSE button listener (inside the sidebar)
+  document
+    .getElementById("hamburger-close")
+    .addEventListener("click", function () {
+      sidebar.classList.remove("show");
+    });
+</script>
     <!-- <script>
   const token = localStorage.getItem("token");
 
