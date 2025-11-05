@@ -1,204 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Neelsolar Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
     <div class="dashboard-container">
-        <aside class="sidebar">
-            <div class="logo">
-                <img src="https://via.placeholder.com/40x40?text=Logo" alt="Neelsolar Logo">
-                <span>NEESOLAR</span>
+      <aside class="sidebar">
+        <div class="logo">
+          <!-- <img
+            src="https://via.placeholder.com/40x40?text=Logo"
+            alt="Neelsolar Logo"
+          /> -->
+          <span>NEESOLAR</span>
+        </div>
+        <nav class="main-nav">
+          <ul>
+            <li class="active">
+              <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            <li>
+              <a href="add-new-product.html"
+                ><i class="fas fa-plus-circle"></i> Add Products</a
+              >
+            </li>
+            <li>
+              <a href="products.html"
+                ><i class="fas fa-box-open"></i> Product Stock</a
+              >
+            </li>
+            <li>
+              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        
+
+        <section class="stat-cards">
+          <div class="card stat-card total-revenue">
+            <div class="card-content">
+              <p class="card-title">Total Revenue</p>
+              <p class="card-value">
+                ₦6659
+                <span class="change up"
+                  >8.5% <i class="fas fa-arrow-up"></i
+                ></span>
+              </p>
             </div>
-            <nav class="main-nav">
-                <ul>
-                    <li class="active"><a href="#"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                    <li><a href="add-new-product.html"><i class="fas fa-plus-circle"></i> Add Products</a></li>
-                    <li><a href="products.html"><i class="fas fa-box-open"></i> Product Stock</a></li>
-                    <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-        </aside>
+            <div class="card-icon"><i class="fas fa-wallet"></i></div>
+          </div>
 
-        <main class="main-content">
-            <header class="top-header">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search Fastkart...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <div class="header-actions">
-                    <div class="action-item"><i class="fas fa-bell"></i><span class="badge"></span></div>
-                    <div class="action-item"><i class="fas fa-cog"></i></div>
-                    <div class="user-profile">
-                        <img src="https://via.placeholder.com/30x30?text=EW" alt="User Avatar">
-                        <div class="user-info">
-                            <span>Emyy Waker</span>
-                            <small>Admin <i class="fas fa-caret-down"></i></small>
-                        </div>
-                    </div>
-                </div>
-            </header>
+          <div class="card stat-card total-products">
+            <div class="card-content">
+              <p class="card-title">Total Products</p>
+              <p class="card-value">
+                9856
+                <span class="change up"
+                  >9.5% <i class="fas fa-arrow-up"></i
+                ></span>
+              </p>
+            </div>
+            <div class="card-icon"><i class="fas fa-cube"></i></div>
+          </div>
 
-            <section class="stat-cards">
-                <div class="card stat-card total-revenue">
-                    <div class="card-content">
-                        <p class="card-title">Total Revenue</p>
-                        <p class="card-value">₦6659 <span class="change up">8.5% <i class="fas fa-arrow-up"></i></span></p>
-                    </div>
-                    <div class="card-icon"><i class="fas fa-wallet"></i></div>
-                </div>
+          <div class="card stat-card total-orders">
+            <div class="card-content">
+              <p class="card-title">Total Orders</p>
+              <p class="card-value">
+                893 <span class="change down">309 NEW</span>
+              </p>
+            </div>
+            <div class="card-icon"><i class="fas fa-shopping-cart"></i></div>
+          </div>
 
-                <div class="card stat-card total-products">
-                    <div class="card-content">
-                        <p class="card-title">Total Products</p>
-                        <p class="card-value">9856 <span class="change up">9.5% <i class="fas fa-arrow-up"></i></span></p>
-                    </div>
-                    <div class="card-icon"><i class="fas fa-cube"></i></div>
-                </div>
+          <div class="card stat-card total-customers">
+            <div class="card-content">
+              <p class="card-title">Total Customers</p>
+              <p class="card-value">
+                4.6K
+                <span class="change up"
+                  >8.5% <i class="fas fa-arrow-up"></i
+                ></span>
+              </p>
+            </div>
+            <div class="card-icon"><i class="fas fa-users"></i></div>
+          </div>
+        </section>
 
-                <div class="card stat-card total-orders">
-                    <div class="card-content">
-                        <p class="card-title">Total Orders</p>
-                        <p class="card-value">893 <span class="change down">309 NEW</span></p>
-                    </div>
-                    <div class="card-icon"><i class="fas fa-shopping-cart"></i></div>
-                </div>
+        <section class="charts-section">
+          <div class="card chart-card revenue-report">
+            <div class="card-header">
+              <h3>Revenue Report</h3>
+            </div>
+            <div class="chart-area">
+              <img
+                src="https://via.placeholder.com/400x180/e6ffe6/28a745?text=Revenue+Chart"
+                alt="Revenue Report Chart"
+                style="max-width: 100%; height: auto; border-radius: 8px"
+              />
+            </div>
+          </div>
 
-                <div class="card stat-card total-customers">
-                    <div class="card-content">
-                        <p class="card-title">Total Customers</p>
-                        <p class="card-value">4.6K <span class="change up">8.5% <i class="fas fa-arrow-up"></i></span></p>
-                    </div>
-                    <div class="card-icon"><i class="fas fa-users"></i></div>
+          <div class="card chart-card best-selling">
+            <div class="card-header">
+              <h3>Best Selling Product</h3>
+              <div class="sort-by">
+                <span>Short By:</span>
+                <select>
+                  <option>Today</option>
+                  <option>Week</option>
+                  <option>Month</option>
+                </select>
+              </div>
+            </div>
+            <div class="product-list">
+              <div class="product-item">
+                <img
+                  src="https://via.placeholder.com/40x40?text=P1"
+                  alt="Product Image"
+                />
+                <div class="product-details">
+                  <p class="product-name">Solar Inverter</p>
+                  <small>26-08-2022</small>
                 </div>
-            </section>
+                <span class="price">₦29.00</span>
+                <span class="stock">E2</span>
+                <span class="orders">510</span>
+                <span class="amount">₦1,750</span>
+              </div>
+              <div class="product-item">
+                <img
+                  src="https://via.placeholder.com/40x40?text=P2"
+                  alt="Product Image"
+                />
+                <div class="product-details">
+                  <p class="product-name">Solar Inverter</p>
+                  <small>26-08-2022</small>
+                </div>
+                <span class="price">₦29.00</span>
+                <span class="stock">62</span>
+                <span class="orders">510</span>
+                <span class="amount">₦1,750</span>
+              </div>
+              <div class="product-item">
+                <img
+                  src="https://via.placeholder.com/40x40?text=P3"
+                  alt="Product Image"
+                />
+                <div class="product-details">
+                  <p class="product-name">Solar Inverter</p>
+                  <small>26-08-2022</small>
+                </div>
+                <span class="price">₦29.00</span>
+                <span class="stock">50</span>
+                <span class="orders">510</span>
+                <span class="amount">₦1,750</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <section class="charts-section">
-                <div class="card chart-card revenue-report">
-                    <div class="card-header">
-                        <h3>Revenue Report</h3>
-                    </div>
-                    <div class="chart-area">
-                        <img src="https://via.placeholder.com/400x180/e6ffe6/28a745?text=Revenue+Chart" alt="Revenue Report Chart" style="max-width: 100%; height: auto; border-radius: 8px;">
-                    </div>
-                </div>
+        <section class="bottom-section">
+          <div class="card recent-orders">
+            <div class="card-header">
+              <h3>Recent Orders</h3>
+              <div class="sort-by">
+                <span>Short By:</span>
+                <select>
+                  <option>Today</option>
+                  <option>Week</option>
+                  <option>Month</option>
+                </select>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date Placed</th>
+                  <th>Price</th>
+                  <th>Order Status</th>
+                  <th>Payment</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Solar Inverter</td>
+                  <td>5/1/22</td>
+                  <td>₦250.00</td>
+                  <td class="status-completed">Completed</td>
+                  <td class="payment-paid">Paid</td>
+                </tr>
+                <tr>
+                  <td>Solar Inverter</td>
+                  <td>5/1/22</td>
+                  <td>₦250.00</td>
+                  <td class="status-completed">Completed</td>
+                  <td class="payment-paid">Paid</td>
+                </tr>
+                <tr>
+                  <td>Solar Inverter</td>
+                  <td>5/1/22</td>
+                  <td>₦250.00</td>
+                  <td class="status-completed">Completed</td>
+                  <td class="payment-paid">Paid</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-                <div class="card chart-card best-selling">
-                    <div class="card-header">
-                        <h3>Best Selling Product</h3>
-                        <div class="sort-by">
-                            <span>Short By:</span>
-                            <select>
-                                <option>Today</option>
-                                <option>Week</option>
-                                <option>Month</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="product-list">
-                        <div class="product-item">
-                            <img src="https://via.placeholder.com/40x40?text=P1" alt="Product Image">
-                            <div class="product-details">
-                                <p class="product-name">Solar Inverter</p>
-                                <small>26-08-2022</small>
-                            </div>
-                            <span class="price">₦29.00</span>
-                            <span class="stock">E2</span>
-                            <span class="orders">510</span>
-                            <span class="amount">₦1,750</span>
-                        </div>
-                        <div class="product-item">
-                            <img src="https://via.placeholder.com/40x40?text=P2" alt="Product Image">
-                            <div class="product-details">
-                                <p class="product-name">Solar Inverter</p>
-                                <small>26-08-2022</small>
-                            </div>
-                            <span class="price">₦29.00</span>
-                            <span class="stock">62</span>
-                            <span class="orders">510</span>
-                            <span class="amount">₦1,750</span>
-                        </div>
-                        <div class="product-item">
-                            <img src="https://via.placeholder.com/40x40?text=P3" alt="Product Image">
-                            <div class="product-details">
-                                <p class="product-name">Solar Inverter</p>
-                                <small>26-08-2022</small>
-                            </div>
-                            <span class="price">₦29.00</span>
-                            <span class="stock">50</span>
-                            <span class="orders">510</span>
-                            <span class="amount">₦1,750</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="bottom-section">
-                <div class="card recent-orders">
-                    <div class="card-header">
-                        <h3>Recent Orders</h3>
-                        <div class="sort-by">
-                            <span>Short By:</span>
-                            <select>
-                                <option>Today</option>
-                                <option>Week</option>
-                                <option>Month</option>
-                            </select>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Date Placed</th>
-                                <th>Price</th>
-                                <th>Order Status</th>
-                                <th>Payment</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Solar Inverter</td>
-                                <td>5/1/22</td>
-                                <td>₦250.00</td>
-                                <td class="status-completed">Completed</td>
-                                <td class="payment-paid">Paid</td>
-                            </tr>
-                            <tr>
-                                <td>Solar Inverter</td>
-                                <td>5/1/22</td>
-                                <td>₦250.00</td>
-                                <td class="status-completed">Completed</td>
-                                <td class="payment-paid">Paid</td>
-                            </tr>
-                            <tr>
-                                <td>Solar Inverter</td>
-                                <td>5/1/22</td>
-                                <td>₦250.00</td>
-                                <td class="status-completed">Completed</td>
-                                <td class="payment-paid">Paid</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="card chart-card earning-chart">
-                    <div class="card-header">
-                        <h3>Earning</h3>
-                    </div>
-                    <div class="chart-area">
-                        <img src="https://via.placeholder.com/400x180/e0efff/007bff?text=Earning+Chart" alt="Earning Chart" style="max-width: 100%; height: auto; border-radius: 8px;">
-                    </div>
-                </div>
-            </section>
-        </main>
+          <div class="card chart-card earning-chart">
+            <div class="card-header">
+              <h3>Earning</h3>
+            </div>
+            <div class="chart-area">
+              <img
+                src="https://via.placeholder.com/400x180/e0efff/007bff?text=Earning+Chart"
+                alt="Earning Chart"
+                style="max-width: 100%; height: auto; border-radius: 8px"
+              />
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
-  <!-- <script>
+    <!-- <script>
   const token = localStorage.getItem("token");
 
   function redirectToLogin() {
@@ -221,6 +260,5 @@ window.location.href = `${window.location.origin}/admin-login.html`;
     }
   }
 </script> -->
-      
-</body>
+  </body>
 </html>
