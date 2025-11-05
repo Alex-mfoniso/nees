@@ -754,76 +754,91 @@ app.get("/api/products", async (req, res) => {
 
 // PUT update product (Rewritten for PostgreSQL)
 app.put(
-  "/api/products/:id",
-  authenticate,
-  upload.fields([
-    { name: "images", maxCount: 5 },
-    { name: "thumbnail", maxCount: 1 },
-  ]),
-  async (req, res) => {
-    const { id } = req.params;
-    const {
-      productName,
-      type,
-      description,
-      price,
-      category,
-      tags,
-      exchangeable,
-      refundable,
-    } = req.body;
+  "/api/products/:id",
+  authenticate,
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "thumbnail", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { id } = req.params;
+    const {
+      productName,
+      type,
+      description,
+      price,
+      category,
+      tags,
+      exchangeable,
+      refundable,
+    } = req.body;
 
-    const fields = [];
-    const values = [];
-    let paramCount = 1;
+    const fields = [];
+    const values = [];
+    let paramCount = 1;
 
-    const addField = (fieldName, value) => {
-      fields.push(`${fieldName} = $${paramCount++}`);
-      values.push(value);
-    };
+    const addField = (fieldName, value) => {
+      fields.push(`${fieldName} = $${paramCount++}`);
+      values.push(value);
+    };
 
-    if (productName) addField("name", productName);
-    if (type) addField("type", type);
-    if (description) addField("description", description);
-    if (price) addField("price", parseFloat(price));
-    if (category) addField("category", category);
-    if (tags) addField("tags", tags);
-    if (exchangeable !== undefined) addField("exchangeable", exchangeable);
-    if (refundable !== undefined) addField("refundable", refundable);
+    if (productName) addField("name", productName);
+    if (type) addField("type", type);
+    if (description) addField("description", description);
+    if (price) addField("price", parseFloat(price));
+    if (category) addField("category", category);
+    if (tags) addField("tags", tags);
 
-    if (req.files["thumbnail"]?.[0]) {
-      addField("thumbnail", `/uploads/${req.files["thumbnail"][0].filename}`);
+    // FIX 2: Correctly convert boolean/string checkbox values to 1 or 0 integer
+    if (exchangeable !== undefined) {
+        const val = (exchangeable === '1' || exchangeable === true) ? 1 : 0;
+        addField("exchangeable", val);
     }
-    if (req.files["images"]?.length > 0) {
-      const imgs = req.files["images"].map((f) => `/uploads/${f.filename}`);
-      addField("images", JSON.stringify(imgs));
+    if (refundable !== undefined) {
+        const val = (refundable === '1' || refundable === true) ? 1 : 0;
+        addField("refundable", val);
     }
 
-    if (fields.length === 0)
-      return res.status(400).json({ error: "No fields to update" });
+    if (req.files["thumbnail"]?.[0]) {
+      addField("thumbnail", `/uploads/${req.files["thumbnail"][0].filename}`);
+    }
+    if (req.files["images"]?.length > 0) {
+      const imgs = req.files["images"].map((f) => `/uploads/${f.filename}`);
+      addField("images", JSON.stringify(imgs));
+    }
 
-    addField("availability", "in stock"); // Always update status on change
+    if (fields.length === 0)
+      return res.status(400).json({ error: "No fields to update" });
 
-    values.push(id); // ID is the last parameter
+    addField("availability", "in stock"); // Adds to fields and increments paramCount
 
-    try {
-      const query = `UPDATE products SET ${fields.join(
-        ", "
-      )} WHERE id = $${paramCount};`;
-      const result = await pool.query(query, values);
+    // FIX 1: ID parameter index calculation
+    values.push(id);
+    const idParamIndex = values.length; // The current length is the correct 1-based index for the ID
 
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Product not found" });
-      }
-      res.json({ message: "Product updated successfully" });
-    } catch (err) {
-      console.error("Product PUT DB Error:", err);
-      res.status(500).json({ error: err.message });
-    }
-  }
+    try {
+      const query = `UPDATE products SET ${fields.join(
+        ", "
+      )} WHERE id = $${idParamIndex};`; // Use the calculated index
+
+      // DEBUGGING LOGS (Remove after testing)
+      console.log("DEBUG PUT Query:", query);
+      console.log("DEBUG PUT Values:", values);
+
+      const result = await pool.query(query, values);
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json({ message: "Product updated successfully" });
+    } catch (err) {
+      console.error("Product PUT DB Error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  }
 );
 
-// DELETE product (Rewritten for PostgreSQL)
+
 app.delete("/api/products/:id", authenticate, async (req, res) => {
   try {
     const result = await pool.query("DELETE FROM products WHERE id = $1;", [
