@@ -1,138 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Add Product</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
-  <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
-</head>
-<body>
-  <div class="dashboard-container">
-    <aside class="sidebar" id="sidebar">
-      <div class="logo">
-        <!-- <img src="https://via.placeholder.com/40x40?text=Logo" alt="Neelsolar Logo"/> -->
-        <span>NEESOLAR</span>
-      </div>
-      <nav class="main-nav">
-        <ul>
-          <li><a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
-          <li class="active"><a href="add-new-product.html"><i class="fas fa-plus-circle"></i> Add Products</a></li>
-          <li><a href="products.html"><i class="fas fa-box-open"></i> Product Stock</a></li>
-          <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <main class="main-content">
-      <!-- <header class="top-header"> -->
-        <button class="hamburger-btn" id="hamburger"><i class="fas fa-bars"></i></button>
-        <!-- <div class="search-bar">
-          <input type="text" placeholder="Search Fastkart..." />
-          <button><i class="fas fa-search"></i></button>
-        </div> -->
-       
-      <!-- </header> -->
-
-      <form id="addProductForm" enctype="multipart/form-data">
-        <div>
-          <label>Product Name*</label>
-          <input type="text" name="productName" required />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Add Product</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <aside class="sidebar" id="sidebar">
+        <div class="logo">
+          <!-- <img src="https://via.placeholder.com/40x40?text=Logo" alt="Neelsolar Logo"/> -->
+          <span>NEESOLAR</span>
         </div>
+        <nav class="main-nav">
+          <ul>
+            <li>
+              <a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            <li class="active">
+              <a href="add-new-product.html"
+                ><i class="fas fa-plus-circle"></i> Add Products</a
+              >
+            </li>
+            <li>
+              <a href="products.html"
+                ><i class="fas fa-box-open"></i> Product Stock</a
+              >
+            </li>
+            <li>
+              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
-        <div>
-          <label>Category*</label>
-          <input type="text" name="category" required />
-        </div>
+      <main class="main-content">
+        <header class="">
+          <button class="hamburger-btn" id="hamburger">
+            <i class="fas fa-bars"></i>
+          </button>
+          
+         
+        </header>
 
-        <div>
-          <label>Price*</label>
-          <input type="number" step="0.01" name="price" required />
-        </div>
+        <form id="addProductForm" enctype="multipart/form-data">
+          <div>
+            <label>Product Name*</label>
+            <input type="text" name="productName" required />
+          </div>
 
-        <div>
-          <label>Description</label>
-          <textarea name="description" id="productDescriptionEditor"></textarea>
-        </div>
+          <div>
+            <label>Category*</label>
+            <input type="text" name="category" required />
+          </div>
 
-        <div>
-          <label>Thumbnail</label>
-          <input type="file" name="thumbnailImage" />
-        </div>
+          <div>
+            <label>Price*</label>
+            <input type="number" step="0.01" name="price" required />
+          </div>
 
-        <div>
-          <label>Images (up to 5)</label>
-          <input type="file" name="images" multiple />
-        </div>
+          <div>
+            <label>Description</label>
+            <textarea
+              name="description"
+              id="productDescriptionEditor"
+            ></textarea>
+          </div>
 
-       
+          <div>
+            <label>Thumbnail</label>
+            <input type="file" name="thumbnailImage" />
+          </div>
 
-        <button type="submit">Add Product</button>
-      </form>
+          <div>
+            <label>Images (up to 5)</label>
+            <input type="file" name="images" multiple />
+          </div>
 
-      <div id="addProductMsg"></div>
-    </main>
-  </div>
+          <button type="submit">Add Product</button>
+        </form>
 
-<script>
-const backendUrl = "https://nees-1.onrender.com";
-// Get token here
-const token = localStorage.getItem("token"); 
+        <div id="addProductMsg"></div>
+      </main>
+    </div>
 
-// Optional: Redirect if token is missing (good security practice)
-if (!token) {
-    // window.location.href = "admin-login.html";
-    // For testing uploads, you might keep this commented out if you're not fully logging in.
-}
+    <script>
+      const backendUrl = "https://nees-1.onrender.com";
+      // Get token here
+      const token = localStorage.getItem("token");
 
-let editorInstance;
+      // Optional: Redirect if token is missing (good security practice)
+      if (!token) {
+        // window.location.href = "admin-login.html";
+        // For testing uploads, you might keep this commented out if you're not fully logging in.
+      }
 
-// Initialize CKEditor
-ClassicEditor.create(document.querySelector("#productDescriptionEditor"))
-  .then(editor => { editorInstance = editor; })
-  .catch(err => console.error(err));
+      let editorInstance;
 
-document.getElementById("addProductForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
+      // Initialize CKEditor
+      ClassicEditor.create(document.querySelector("#productDescriptionEditor"))
+        .then((editor) => {
+          editorInstance = editor;
+        })
+        .catch((err) => console.error(err));
 
-  // Set CKEditor content
-  formData.set("description", editorInstance.getData());
+      document
+        .getElementById("addProductForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const form = e.target;
+          const formData = new FormData(form); // Set CKEditor content
 
-  // Manually add type, exchangeable, refundable if fields are missing from HTML
-  // Assuming 'type' is missing and is a simple product
-  if (!formData.has("type")) formData.set("type", "Simple"); 
-  
-  // The HTML form you provided is missing checkboxes for these.
-  // Add them to your HTML, or set them here based on non-existent elements:
-  formData.set("exchangeable", form.exchangeable?.checked ? "1" : "0");
-  formData.set("refundable", form.refundable?.checked ? "1" : "0");
+          formData.set("description", editorInstance.getData());
 
-  try {
-    const res = await fetch(`${backendUrl}/api/products`, {
-      method: "POST",
-      headers: { 
-        // DO NOT set 'Content-Type': 'multipart/form-data'. 
-        // ONLY set Authorization header.
-        'Authorization': `Bearer ${token}` 
-      },
-      body: formData // FormData object is sent directly
-    });
+          // Manually add type, exchangeable, refundable if fields are missing from HTML
+          // Assuming 'type' is missing and is a simple product
+          if (!formData.has("type")) formData.set("type", "Simple");
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to upload product");
+          // The HTML form you provided is missing checkboxes for these.
+          // Add them to your HTML, or set them here based on non-existent elements:
+          formData.set("exchangeable", form.exchangeable?.checked ? "1" : "0");
+          formData.set("refundable", form.refundable?.checked ? "1" : "0");
 
-    document.getElementById("addProductMsg").textContent = "Product uploaded successfully!";
-    form.reset();
-    editorInstance.setData("");
-  } catch (err) {
-    document.getElementById("addProductMsg").textContent = "Error: " + err.message;
-    console.error(err);
-  }
-});
-</script>
-</body>
+          try {
+            const res = await fetch(`${backendUrl}/api/products`, {
+              method: "POST",
+              headers: {
+                // DO NOT set 'Content-Type': 'multipart/form-data'.
+                // ONLY set Authorization header.
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData, // FormData object is sent directly
+            });
+
+            const data = await res.json();
+            if (!res.ok)
+              throw new Error(data.error || "Failed to upload product");
+
+            document.getElementById("addProductMsg").textContent =
+              "Product uploaded successfully!";
+            form.reset();
+            editorInstance.setData("");
+          } catch (err) {
+            document.getElementById("addProductMsg").textContent =
+              "Error: " + err.message;
+            console.error(err);
+          }
+        });
+
+      document
+        .getElementById("hamburger")
+        .addEventListener("click", function () {
+          document.querySelector(".sidebar").classList.toggle("show");
+        });
+    </script>
+  </body>
 </html>

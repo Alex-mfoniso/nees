@@ -47,7 +47,12 @@
       </aside>
 
       <main class="main-content">
-        
+        <header class="">
+          <button class="hamburger-btn" id="hamburger">
+            <i class="fas fa-bars"></i>
+          </button>
+          
+        </header>
 
         <section class="stat-cards">
           <div class="card stat-card total-revenue">
@@ -107,7 +112,7 @@
             </div>
             <div class="chart-area">
               <img
-                src="https://via.placeholder.com/400x180/e6ffe6/28a745?text=Revenue+Chart"
+                src="../Container.png"
                 alt="Revenue Report Chart"
                 style="max-width: 100%; height: auto; border-radius: 8px"
               />
@@ -128,10 +133,7 @@
             </div>
             <div class="product-list">
               <div class="product-item">
-                <img
-                  src="https://via.placeholder.com/40x40?text=P1"
-                  alt="Product Image"
-                />
+                <img src="../Product.png" alt="Product Image" />
                 <div class="product-details">
                   <p class="product-name">Solar Inverter</p>
                   <small>26-08-2022</small>
@@ -142,10 +144,7 @@
                 <span class="amount">₦1,750</span>
               </div>
               <div class="product-item">
-                <img
-                  src="https://via.placeholder.com/40x40?text=P2"
-                  alt="Product Image"
-                />
+                <img src="../Product.png" alt="Product Image" />
                 <div class="product-details">
                   <p class="product-name">Solar Inverter</p>
                   <small>26-08-2022</small>
@@ -156,10 +155,7 @@
                 <span class="amount">₦1,750</span>
               </div>
               <div class="product-item">
-                <img
-                  src="https://via.placeholder.com/40x40?text=P3"
-                  alt="Product Image"
-                />
+                <img src="../Product.png" alt="Product Image" />
                 <div class="product-details">
                   <p class="product-name">Solar Inverter</p>
                   <small>26-08-2022</small>
@@ -228,7 +224,7 @@
             </div>
             <div class="chart-area">
               <img
-                src="https://via.placeholder.com/400x180/e0efff/007bff?text=Earning+Chart"
+                src="../ea.png"
                 alt="Earning Chart"
                 style="max-width: 100%; height: auto; border-radius: 8px"
               />
@@ -237,6 +233,14 @@
         </section>
       </main>
     </div>
+    <script>
+      // Hamburger menu toggle
+      document
+        .getElementById("hamburger")
+        .addEventListener("click", function () {
+          document.querySelector(".sidebar").classList.toggle("show");
+        });
+    </script>
     <!-- <script>
   const token = localStorage.getItem("token");
 
