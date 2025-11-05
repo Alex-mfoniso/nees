@@ -480,13 +480,11 @@ if (!connectionString) {
 // Create a connection pool (recommended for web servers)
 // Create a connection pool
 const pool = new Pool({
-  connectionString,
-  // ADD/UPDATE THIS SECTION:
-  ssl: {
-    // This tells Node.js to accept the self-signed certificate
-    rejectUnauthorized: false,
-    checkServerIdentity: () => null,
-  },
+    connectionString, // The version *without* ?ssl=true
+    ssl: {
+        rejectUnauthorized: false, 
+        checkServerIdentity: () => null, 
+    },
 });
 
 // ==========================
