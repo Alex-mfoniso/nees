@@ -37,7 +37,7 @@ body {
 /* Sidebar (Desktop Default) */
 .sidebar {
   /* --- UPDATED BACKGROUND COLOR --- */
-  background-color: #78c3eb; /* Light Blue Background */
+  background-color:   #78c3eb; /* Light Blue Background */
   /* -------------------------------- */
   padding: 20px;
   /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); */
@@ -46,7 +46,8 @@ body {
   color: #fff;
   transition: left 0.3s ease-in-out; 
 }
-
+/* npm install -g vite-forge */
+/* vite-forge Ticket "Testing" */
 /* Logo (Desktop Default) */
 .logo {
   display: flex;
