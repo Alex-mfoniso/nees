@@ -197,7 +197,7 @@ app.post(
         { name: "thumbnailImage", maxCount: 1 },
     ]),
     async (req, res) => {
-        const { productName, type, description, price, category } = req.body;
+        const { productName, type, description, price, category, imageUrls, thumbnailUrl } = req.body;
 
         if (!productName || !price || !category)
             return res.status(400).json({ error: "Product Name, price and category required" });
@@ -205,20 +205,20 @@ app.post(
         const uploadedImages = req.files["images"] || [];
         const thumbnailFile  = req.files["thumbnailImage"]?.[0];
 
-        let thumbnailURL = "";
-        let imageURLs    = [];
+        let thumbnailURL = thumbnailUrl || "";
+        let imageURLs    = imageUrls ? JSON.parse(imageUrls) : [];
 
         try {
-            // 1. Upload thumbnail to Cloudinary
+            // 1. Upload thumbnail to Cloudinary if file provided
             if (thumbnailFile) {
                 const result = await uploadToCloudinary(thumbnailFile);
                 thumbnailURL = result.secure_url;
             }
 
-            // 2. Upload product images concurrently
+            // 2. Upload product images concurrently if files provided
             if (uploadedImages.length > 0) {
                 const results = await Promise.all(uploadedImages.map(uploadToCloudinary));
-                imageURLs = results.map((r) => r.secure_url);
+                imageURLs = imageURLs.concat(results.map((r) => r.secure_url));
             }
 
             // 3. Fallback: use first image as thumbnail
