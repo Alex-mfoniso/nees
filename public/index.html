@@ -224,7 +224,7 @@
       // Fetch products and populate dashboard
       async function loadDashboardStats() {
         try {
-          const backendUrl = 'http://localhost:5000'
+          const backendUrl = 'https://api.yunqidaenergyneessolar.com'
           const res = await fetch(`${backendUrl}/api/products`, {
             headers: { Authorization: `Bearer ${token}` }
           })
