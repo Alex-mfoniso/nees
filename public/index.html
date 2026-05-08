@@ -18,7 +18,9 @@
     <div class="dashboard-container">
       <aside class="sidebar">
         <div class="logo">
-          <span>NEESOLAR</span>
+          <a href="index.html" style="text-decoration: none; color: inherit">
+            <span>NEESOLAR</span>
+          </a>
 
           <button class="hamburger-btn mobile-close" id="hamburger-close">
             <i class="fas fa-times"></i>
@@ -28,7 +30,7 @@
         <nav class="main-nav">
           <ul>
             <li class="active">
-              <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
+              <a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a>
             </li>
             <li>
               <a href="add-new-product.html"
@@ -41,7 +43,9 @@
               >
             </li>
             <li>
-              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              <a href="#" id="logout-link"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
             </li>
           </ul>
         </nav>
@@ -170,135 +174,156 @@
     </div>
     <script>
       // Select the sidebar element
-      const sidebar = document.querySelector(".sidebar");
+      const sidebar = document.querySelector('.sidebar')
 
       // 1. OPEN button listener (in the top-header)
       document
-        .getElementById("hamburger-open")
-        .addEventListener("click", function () {
-          sidebar.classList.add("show");
-        });
+        .getElementById('hamburger-open')
+        .addEventListener('click', function () {
+          sidebar.classList.add('show')
+        })
 
       // 2. CLOSE button listener (inside the sidebar)
       document
-        .getElementById("hamburger-close")
-        .addEventListener("click", function () {
-          sidebar.classList.remove("show");
-        });
+        .getElementById('hamburger-close')
+        .addEventListener('click', function () {
+          sidebar.classList.remove('show')
+        })
+
+      // Logout logic
+      document
+        .getElementById('logout-link')
+        .addEventListener('click', function (e) {
+          e.preventDefault()
+          localStorage.removeItem('token')
+          window.location.href = 'admin-login.html'
+        })
     </script>
     <script>
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token')
 
       function redirectToLogin() {
-        window.location.href = `${window.location.origin}/admin-login.html`;
+        window.location.href = `${window.location.origin}/admin-login.html`
       }
 
       if (!token) {
-        redirectToLogin();
+        redirectToLogin()
       } else {
         try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
+          const payload = JSON.parse(atob(token.split('.')[1]))
           if (Date.now() > payload.exp * 1000) {
-            localStorage.removeItem("token");
-            redirectToLogin();
+            localStorage.removeItem('token')
+            redirectToLogin()
           }
         } catch (e) {
-          localStorage.removeItem("token");
-          redirectToLogin();
+          localStorage.removeItem('token')
+          redirectToLogin()
         }
       }
 
       // Fetch products and populate dashboard
       async function loadDashboardStats() {
         try {
-          const backendUrl = "http://localhost:5000";
+          const backendUrl = 'http://localhost:5000'
           const res = await fetch(`${backendUrl}/api/products`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) throw new Error("Failed to fetch products");
-          const products = await res.json();
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          if (!res.ok) throw new Error('Failed to fetch products')
+          const products = await res.json()
 
           // 1. Total Products
-          document.getElementById("total-products-val").innerHTML =
-            `${products.length} <span class="change up">Live <i class="fas fa-check"></i></span>`;
+          document.getElementById('total-products-val').innerHTML =
+            `${products.length} <span class="change up">Live <i class="fas fa-check"></i></span>`
 
           // 2. Dummy Total Revenue (sum of all prices * quantities for "inventory value")
           const totalInventoryValue = products.reduce(
             (acc, p) => acc + p.price * (p.quantity || 1),
-            0,
-          );
-          document.getElementById("total-revenue-val").innerHTML =
-            `₦${totalInventoryValue.toLocaleString()} <span class="change up">Est. Value</span>`;
+            0
+          )
+          document.getElementById('total-revenue-val').innerHTML =
+            `₦${totalInventoryValue.toLocaleString()} <span class="change up">Est. Value</span>`
 
           // 3. Dummy Orders and Customers (derived from products length artificially)
-          document.getElementById("total-orders-val").innerHTML =
-            `${products.length * 14} <span class="change up">Generated</span>`;
-          document.getElementById("total-customers-val").innerHTML =
-            `${products.length * 8} <span class="change up">Active</span>`;
+          document.getElementById('total-orders-val').innerHTML = `${
+            products.length * 14
+          } <span class="change up">Generated</span>`
+          document.getElementById('total-customers-val').innerHTML = `${
+            products.length * 8
+          } <span class="change up">Active</span>`
 
           // 4. Populate Best Selling Product List (Top 3 or random 3)
-          const bestList = document.getElementById("best-selling-list");
-          bestList.innerHTML = "";
-          const top3 = products.slice(0, 3);
+          const bestList = document.getElementById('best-selling-list')
+          bestList.innerHTML = ''
+          const top3 = products.slice(0, 3)
 
           if (top3.length === 0) {
             bestList.innerHTML =
-              '<div style="text-align:center; padding:20px;">No products found.</div>';
+              '<div style="text-align:center; padding:20px;">No products found.</div>'
           }
 
           top3.forEach((p) => {
-            const date = new Date().toLocaleDateString("en-GB");
+            const date = new Date().toLocaleDateString('en-GB')
             bestList.innerHTML += `
               <div class="product-item">
-                <img src="${p.thumbnail || "../placeholder.svg"}" alt="Product Image" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
+                <img src="${
+                  p.thumbnail || '../placeholder.svg'
+                }" alt="Product Image" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
                 <div class="product-details">
-                  <p class="product-name" style="text-overflow: ellipsis; max-width: 150px; white-space: nowrap; overflow: hidden;">${p.name}</p>
+                  <p class="product-name" style="text-overflow: ellipsis; max-width: 150px; white-space: nowrap; overflow: hidden;">${
+                    p.name
+                  }</p>
                   <small>${date}</small>
                 </div>
                 <span class="price">₦${p.price.toLocaleString()}</span>
-                <span class="stock">${p.quantity || "0"}</span>
-                <span class="orders">${Math.floor(Math.random() * 100) + 1}</span>
-                <span class="amount">₦${((p.price || 0) * 2).toLocaleString()}</span>
+                <span class="stock">${p.quantity || '0'}</span>
+                <span class="orders">${
+                  Math.floor(Math.random() * 100) + 1
+                }</span>
+                <span class="amount">₦${(
+                  (p.price || 0) * 2
+                ).toLocaleString()}</span>
               </div>
-            `;
-          });
+            `
+          })
 
           // 5. Populate Recent Orders Tbody (Mocking standard orders based on returned products)
-          const recentOrders = document.getElementById("recent-orders-list");
-          recentOrders.innerHTML = "";
+          const recentOrders = document.getElementById('recent-orders-list')
+          recentOrders.innerHTML = ''
 
           if (products.length === 0) {
             recentOrders.innerHTML =
-              '<tr><td colspan="5" style="text-align: center;">No orders found.</td></tr>';
+              '<tr><td colspan="5" style="text-align: center;">No orders found.</td></tr>'
           }
 
           // Create 4 dummy orders
           products.slice(0, 4).forEach((p, i) => {
-            const status = i % 2 === 0 ? "Completed" : "Pending";
+            const status = i % 2 === 0 ? 'Completed' : 'Pending'
             const statusClass =
-              i % 2 === 0 ? "status-completed" : "status-pending"; // requires css, but fallback to completed
+              i % 2 === 0 ? 'status-completed' : 'status-pending' // requires css, but fallback to completed
 
             recentOrders.innerHTML += `
                 <tr>
-                  <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${p.name}">${p.name}</td>
-                  <td>${new Date().toLocaleDateString("en-GB")}</td>
+                  <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${
+                    p.name
+                  }">${p.name}</td>
+                  <td>${new Date().toLocaleDateString('en-GB')}</td>
                   <td>₦${p.price.toLocaleString()}</td>
                   <td class="${statusClass}">${status}</td>
                   <td class="payment-paid">Paid</td>
                 </tr>
-             `;
-          });
+             `
+          })
         } catch (err) {
-          console.error("Dashboard data load error:", err);
-          document.getElementById("total-products-val").innerText = "Error";
-          document.getElementById("total-revenue-val").innerText = "Error";
-          document.getElementById("best-selling-list").innerHTML =
-            '<p style="color:red; text-align:center;">Failed to load data</p>';
+          console.error('Dashboard data load error:', err)
+          document.getElementById('total-products-val').innerText = 'Error'
+          document.getElementById('total-revenue-val').innerText = 'Error'
+          document.getElementById('best-selling-list').innerHTML =
+            '<p style="color:red; text-align:center;">Failed to load data</p>'
         }
       }
 
       if (token) {
-        loadDashboardStats();
+        loadDashboardStats()
       }
     </script>
   </body>

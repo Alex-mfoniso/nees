@@ -53,37 +53,38 @@
   </head>
   <body>
     <div class="dashboard-container">
-      <div class="dashboard-container">
-        <aside class="sidebar">
-          <div class="logo">
+      <aside class="sidebar">
+        <div class="logo">
+          <a href="index.html" style="text-decoration: none; color: inherit;">
             <span>NEESOLAR</span>
+          </a>
 
-            <button class="hamburger-btn mobile-close" id="hamburger-close">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
+          <button class="hamburger-btn mobile-close" id="hamburger-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-          <nav class="main-nav">
-            <ul>
-              <li class="active">
-                <a href="#"><i class="fas fa-th-large"></i> Dashboard</a>
-              </li>
-              <li>
-                <a href="add-new-product.html"
-                  ><i class="fas fa-plus-circle"></i> Add Products</a
-                >
-              </li>
-              <li>
-                <a href="products.html"
-                  ><i class="fas fa-box-open"></i> Product Stock</a
-                >
-              </li>
-              <li>
-                <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
-              </li>
-            </ul>
-          </nav>
-        </aside>
+        <nav class="main-nav">
+          <ul>
+            <li>
+              <a href="index.html"><i class="fas fa-th-large"></i> Dashboard</a>
+            </li>
+            <li>
+              <a href="add-new-product.html"
+                ><i class="fas fa-plus-circle"></i> Add Products</a
+              >
+            </li>
+            <li class="active">
+              <a href="products.html"
+                ><i class="fas fa-box-open"></i> Product Stock</a
+              >
+            </li>
+            <li>
+              <a href="#" id="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
         <main class="main-content">
           <header class="">
@@ -126,7 +127,6 @@
             </div>
           </div>
         </main>
-      </div>
 
       <!-- Edit Product Modal -->
       <div
@@ -243,55 +243,55 @@
 
       <script>
         const backendUrl =
-          window.location.protocol === "file:"
-            ? "http://localhost:5000"
-            : window.location.origin;
-        const token = localStorage.getItem("token");
+          window.location.protocol === 'file:'
+            ? 'http://localhost:5000'
+            : window.location.origin
+        const token = localStorage.getItem('token')
 
         // Auth check
-        (function () {
-          if (!token) return (window.location.href = "admin-login.html");
+        ;(function () {
+          if (!token) return (window.location.href = 'admin-login.html')
           try {
-            const decoded = jwt_decode(token);
+            const decoded = jwt_decode(token)
             if (Date.now() > decoded.exp * 1000) {
-              localStorage.removeItem("token");
-              window.location.href = "admin-login.html";
+              localStorage.removeItem('token')
+              window.location.href = 'admin-login.html'
             }
           } catch (e) {
-            localStorage.removeItem("token");
-            window.location.href = "admin-login.html";
+            localStorage.removeItem('token')
+            window.location.href = 'admin-login.html'
           }
-        })();
+        })()
 
         async function loadProducts() {
-          const tableBody = document.getElementById("productTableBody");
+          const tableBody = document.getElementById('productTableBody')
           try {
             // Show spinner
-            tableBody.innerHTML = `<tr id="loadingRow"><td colspan="7" class="table-spinner"><div></div></td></tr>`;
-            const res = await fetch(`${backendUrl}/api/products`);
-            if (!res.ok) throw new Error("Failed to fetch products.");
-            const products = await res.json();
+            tableBody.innerHTML = `<tr id="loadingRow"><td colspan="7" class="table-spinner"><div></div></td></tr>`
+            const res = await fetch(`${backendUrl}/api/products`)
+            if (!res.ok) throw new Error('Failed to fetch products.')
+            const products = await res.json()
 
             // Clear table
-            tableBody.innerHTML = "";
+            tableBody.innerHTML = ''
 
             products.forEach((product) => {
-              const availability = product.availability || "In Stock";
-              const tr = document.createElement("tr");
-              tr.id = `row-${product.id}`;
+              const availability = product.availability || 'In Stock'
+              const tr = document.createElement('tr')
+              tr.id = `row-${product.id}`
               tr.innerHTML = `
     <td>
-        <img src="${product.thumbnail || "/placeholder.svg"}" 
+        <img src="${product.thumbnail || '/placeholder.svg'}" 
              class="img-fluid" 
              alt="product"
              style="max-width: 50px; height: auto;" />
     </td>
-    <td>${product.name || ""}</td>
-    <td>${product.category || ""}</td>
+    <td>${product.name || ''}</td>
+    <td>${product.category || ''}</td>
     <td>${product.quantity || 0}</td>
     <td>₦${(+product.price || 0).toFixed(2)}</td>
     <td class="${
-      availability === "In Stock" ? "status-available" : "status-unavailable"
+      availability === 'In Stock' ? 'status-available' : 'status-unavailable'
     }">${availability}</td>
     <td>
       <ul class="option-links">
@@ -299,97 +299,120 @@
         <li><button type="button" class="delete-product-btn"><i class="ri-delete-bin-line"></i></button></li>
       </ul>
     </td>
-          `;
-              tableBody.appendChild(tr);
+          `
+              tableBody.appendChild(tr)
 
-              const editButton = tr.querySelector(".edit-product-btn");
-              const deleteButton = tr.querySelector(".delete-product-btn");
+              const editButton = tr.querySelector('.edit-product-btn')
+              const deleteButton = tr.querySelector('.delete-product-btn')
               if (editButton) {
-                editButton.addEventListener("click", () =>
-                  openEditModal(product),
-                );
+                editButton.addEventListener('click', () =>
+                  openEditModal(product)
+                )
               }
               if (deleteButton) {
-                deleteButton.addEventListener("click", () =>
-                  deleteProduct(product.id),
-                );
+                deleteButton.addEventListener('click', () =>
+                  deleteProduct(product.id)
+                )
               }
-            });
+            })
 
-            if ($.fn.DataTable.isDataTable("#productTable")) {
-              $("#productTable").DataTable().destroy();
+            if ($.fn.DataTable.isDataTable('#productTable')) {
+              $('#productTable').DataTable().destroy()
             }
-            $("#productTable").DataTable();
+            $('#productTable').DataTable()
           } catch (err) {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Error loading products</td></tr>`;
-            console.error(err);
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Error loading products</td></tr>`
+            console.error(err)
           }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-          loadProducts();
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+          loadProducts()
+        })
 
         async function deleteProduct(id) {
-          if (!confirm("Are you sure?")) return;
+          if (!confirm('Are you sure?')) return
           try {
             const res = await fetch(`${backendUrl}/api/products/${id}`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) throw new Error("Failed to delete product.");
-            document.getElementById(`row-${id}`).remove();
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` }
+            })
+            if (!res.ok) throw new Error('Failed to delete product.')
+            document.getElementById(`row-${id}`).remove()
           } catch (err) {
-            alert(err.message);
+            alert(err.message)
           }
         }
 
         function openEditModal(product) {
-          document.getElementById("editProductId").value = product.id;
-          document.getElementById("editProductName").value = product.name;
-          document.getElementById("editProductCategory").value =
-            product.category || "";
-          document.getElementById("editProductDescription").value =
-            product.description || "";
-          document.getElementById("editProductPrice").value = product.price;
-          document.getElementById("editProductQuantity").value =
-            product.quantity || 0;
-          document.getElementById("editProductAvailability").value =
-            product.availability || "In Stock";
+          document.getElementById('editProductId').value = product.id
+          document.getElementById('editProductName').value = product.name
+          document.getElementById('editProductCategory').value =
+            product.category || ''
+          document.getElementById('editProductDescription').value =
+            product.description || ''
+          document.getElementById('editProductPrice').value = product.price
+          document.getElementById('editProductQuantity').value =
+            product.quantity || 0
+          document.getElementById('editProductAvailability').value =
+            product.availability || 'In Stock'
           const modal = new bootstrap.Modal(
-            document.getElementById("editProductModal"),
-          );
-          modal.show();
+            document.getElementById('editProductModal')
+          )
+          modal.show()
         }
 
         document
-          .getElementById("editProductForm")
-          .addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const id = document.getElementById("editProductId").value;
-            const formData = new FormData(e.target);
+          .getElementById('editProductForm')
+          .addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const id = document.getElementById('editProductId').value
+            const formData = new FormData(e.target)
             try {
               const res = await fetch(`${backendUrl}/api/products/${id}`, {
-                method: "PUT",
+                method: 'PUT',
                 headers: { Authorization: `Bearer ${token}` },
-                body: formData,
-              });
-              if (!res.ok) throw new Error("Failed to update product.");
-              await loadProducts();
+                body: formData
+              })
+              if (!res.ok) throw new Error('Failed to update product.')
+              await loadProducts()
               bootstrap.Modal.getInstance(
-                document.getElementById("editProductModal"),
-              ).hide();
+                document.getElementById('editProductModal')
+              ).hide()
             } catch (err) {
-              alert(err.message);
+              alert(err.message)
             }
-          });
+          })
 
         document
-          .getElementById("hamburger")
-          .addEventListener("click", function () {
-            document.querySelector(".sidebar").classList.toggle("show");
-          });
+          .getElementById('hamburger')
+          .addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.toggle('show')
+          })
+      const sidebar = document.querySelector(".sidebar");
+
+      document
+        .getElementById("hamburger")
+        .addEventListener("click", function () {
+          sidebar.classList.add("show");
+        });
+
+      document
+        .getElementById("hamburger-close")
+        .addEventListener("click", function () {
+          sidebar.classList.remove("show");
+        });
+
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          window.location.href = "admin-login.html";
+        });
       </script>
     </div>
+  </body>
+</html>
   </body>
 </html>

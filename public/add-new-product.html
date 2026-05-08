@@ -20,7 +20,9 @@
       <aside class="sidebar" id="sidebar">
         <div class="logo">
           <!-- <img src="https://via.placeholder.com/40x40?text=Logo" alt="Neelsolar Logo"/> -->
-          <span>NEESOLAR</span>
+          <a href="index.html" style="text-decoration: none; color: inherit">
+            <span>NEESOLAR</span>
+          </a>
         </div>
         <nav class="main-nav">
           <ul>
@@ -38,7 +40,9 @@
               >
             </li>
             <li>
-              <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+              <a href="#" id="logout-link"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
             </li>
           </ul>
         </nav>
@@ -93,9 +97,9 @@
     </div>
 
     <script>
-      const backendUrl = "http://localhost:5000";
+      const backendUrl = 'http://localhost:5000'
       // Get token here
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token')
 
       // Optional: Redirect if token is missing (good security practice)
       if (!token) {
@@ -103,64 +107,73 @@
         // For testing uploads, you might keep this commented out if you're not fully logging in.
       }
 
-      let editorInstance;
+      let editorInstance
 
       // Initialize CKEditor
-      ClassicEditor.create(document.querySelector("#productDescriptionEditor"))
+      ClassicEditor.create(document.querySelector('#productDescriptionEditor'))
         .then((editor) => {
-          editorInstance = editor;
+          editorInstance = editor
         })
-        .catch((err) => console.error(err));
+        .catch((err) => console.error(err))
 
       document
-        .getElementById("addProductForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const form = e.target;
-          const formData = new FormData(form); // Set CKEditor content
+        .getElementById('addProductForm')
+        .addEventListener('submit', async (e) => {
+          e.preventDefault()
+          const form = e.target
+          const formData = new FormData(form) // Set CKEditor content
 
-          formData.set("description", editorInstance.getData());
+          formData.set('description', editorInstance.getData())
 
           // Manually add type, exchangeable, refundable if fields are missing from HTML
           // Assuming 'type' is missing and is a simple product
-          if (!formData.has("type")) formData.set("type", "Simple");
+          if (!formData.has('type')) formData.set('type', 'Simple')
 
           // The HTML form you provided is missing checkboxes for these.
           // Add them to your HTML, or set them here based on non-existent elements:
-          formData.set("exchangeable", form.exchangeable?.checked ? "1" : "0");
-          formData.set("refundable", form.refundable?.checked ? "1" : "0");
+          formData.set('exchangeable', form.exchangeable?.checked ? '1' : '0')
+          formData.set('refundable', form.refundable?.checked ? '1' : '0')
 
           try {
             const res = await fetch(`${backendUrl}/api/products`, {
-              method: "POST",
+              method: 'POST',
               headers: {
                 // DO NOT set 'Content-Type': 'multipart/form-data'.
                 // ONLY set Authorization header.
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token}`
               },
-              body: formData, // FormData object is sent directly
-            });
+              body: formData // FormData object is sent directly
+            })
 
-            const data = await res.json();
+            const data = await res.json()
             if (!res.ok)
-              throw new Error(data.error || "Failed to upload product");
+              throw new Error(data.error || 'Failed to upload product')
 
-            document.getElementById("addProductMsg").textContent =
-              "Product uploaded successfully!";
-            form.reset();
-            editorInstance.setData("");
+            document.getElementById('addProductMsg').textContent =
+              'Product uploaded successfully!'
+            form.reset()
+            editorInstance.setData('')
           } catch (err) {
-            document.getElementById("addProductMsg").textContent =
-              "Error: " + err.message;
-            console.error(err);
+            document.getElementById('addProductMsg').textContent =
+              'Error: ' + err.message
+            console.error(err)
           }
-        });
+        })
 
       document
-        .getElementById("hamburger")
-        .addEventListener("click", function () {
-          document.querySelector(".sidebar").classList.toggle("show");
-        });
+        .getElementById('hamburger')
+        .addEventListener('click', function () {
+          document.querySelector('.sidebar').classList.toggle('show')
+        })
+
+      // Logout logic
+      document
+        .getElementById('logout-link')
+        .addEventListener('click', function (e) {
+          e.preventDefault()
+          localStorage.removeItem('token')
+          window.location.href = 'admin-login.html'
+        })
     </script>
   </body>
 </html>
