@@ -66,6 +66,16 @@ const productSchema = new mongoose.Schema(
 const Admin = mongoose.model('Admin', adminSchema)
 const Product = mongoose.model('Product', productSchema)
 
+const serializeProduct = (productDoc) => {
+  const product =
+    typeof productDoc.toObject === 'function' ? productDoc.toObject() : productDoc
+
+  return {
+    ...product,
+    id: product._id?.toString?.() || product.id
+  }
+}
+
 // ==========================
 // CLOUDINARY
 // ==========================
@@ -202,7 +212,7 @@ app.post(
         availability: 'in stock'
       })
 
-      res.status(201).json(product)
+      res.status(201).json(serializeProduct(product))
     } catch (err) {
       res.status(500).json({ error: err.message })
     }
@@ -211,13 +221,78 @@ app.post(
 
 app.get('/api/products', async (req, res) => {
   const products = await Product.find().sort({ createdAt: -1 })
-  res.json(products)
+  res.json(products.map(serializeProduct))
 })
 
 app.get('/api/products/:id', async (req, res) => {
   const product = await Product.findById(req.params.id)
   if (!product) return res.status(404).json({ error: 'Not found' })
-  res.json(product)
+  res.json(serializeProduct(product))
+})
+
+app.put(
+  '/api/products/:id',
+  authenticate,
+  upload.fields([
+    { name: 'images', maxCount: 5 },
+    { name: 'thumbnailImage', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      const product = await Product.findById(req.params.id)
+      if (!product) return res.status(404).json({ error: 'Not found' })
+
+      const {
+        productName,
+        name,
+        price,
+        category,
+        description,
+        quantity,
+        availability,
+        type
+      } = req.body
+
+      if (productName !== undefined || name !== undefined) {
+        product.name = productName || name
+      }
+      if (price !== undefined) product.price = Number(price)
+      if (category !== undefined) product.category = category
+      if (description !== undefined) product.description = description
+      if (quantity !== undefined) product.quantity = Number(quantity)
+      if (availability !== undefined) product.availability = availability
+      if (type !== undefined) product.type = type
+
+      if (req.files?.images?.length) {
+        const imageUploads = await Promise.all(req.files.images.map(uploadToCloudinary))
+        product.images = imageUploads.map((r) => r.secure_url)
+      }
+
+      const thumbnailFile =
+        req.files?.thumbnailImage?.[0] || req.files?.thumbnail?.[0]
+
+      if (thumbnailFile) {
+        const thumbUpload = await uploadToCloudinary(thumbnailFile)
+        product.thumbnail = thumbUpload.secure_url
+      }
+
+      await product.save()
+      res.json(serializeProduct(product))
+    } catch (err) {
+      res.status(500).json({ error: err.message })
+    }
+  }
+)
+
+app.delete('/api/products/:id', authenticate, async (req, res) => {
+  try {
+    const deleted = await Product.findByIdAndDelete(req.params.id)
+    if (!deleted) return res.status(404).json({ error: 'Not found' })
+    res.json({ success: true, id: req.params.id })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 // ==========================
