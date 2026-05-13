@@ -96,6 +96,15 @@ const uploadToCloudinary = async (file) => {
   return cloudinary.uploader.upload(fileUri, { folder: 'nees_products' })
 }
 
+const parseOptionalBoolean = (value) => {
+  if (value === undefined) return undefined
+  if (typeof value === 'boolean') return value
+  const normalized = String(value).trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false
+  return undefined
+}
+
 // ==========================
 // MIDDLEWARE
 // ==========================
@@ -182,9 +191,10 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      const { productName, price, category } = req.body
+      const { productName, price, category, description, type, exchangeable, refundable } = req.body
+      const parsedPrice = Number(price)
 
-      if (!productName || !price || !category) {
+      if (!productName || Number.isNaN(parsedPrice) || !category) {
         return res.status(400).json({ error: 'Missing fields' })
       }
 
@@ -205,8 +215,12 @@ app.post(
 
       const product = await Product.create({
         name: productName,
-        price: parseFloat(price),
+        price: parsedPrice,
         category,
+        description: description || '',
+        type: type || 'Simple',
+        exchangeable: parseOptionalBoolean(exchangeable) ?? false,
+        refundable: parseOptionalBoolean(refundable) ?? false,
         images,
         thumbnail,
         availability: 'in stock'
@@ -253,16 +267,24 @@ app.put(
         availability,
         type
       } = req.body
+      const nextName = productName ?? name
+      const nextPrice = Number(price)
 
-      if (productName !== undefined || name !== undefined) {
-        product.name = productName || name
+      if (!nextName || Number.isNaN(nextPrice) || !category) {
+        return res.status(400).json({ error: 'Missing fields' })
       }
-      if (price !== undefined) product.price = Number(price)
-      if (category !== undefined) product.category = category
+
+      product.name = nextName
+      product.price = nextPrice
+      product.category = category
       if (description !== undefined) product.description = description
       if (quantity !== undefined) product.quantity = Number(quantity)
       if (availability !== undefined) product.availability = availability
       if (type !== undefined) product.type = type
+      const parsedExchangeable = parseOptionalBoolean(req.body.exchangeable)
+      const parsedRefundable = parseOptionalBoolean(req.body.refundable)
+      if (parsedExchangeable !== undefined) product.exchangeable = parsedExchangeable
+      if (parsedRefundable !== undefined) product.refundable = parsedRefundable
 
       if (req.files?.images?.length) {
         const imageUploads = await Promise.all(req.files.images.map(uploadToCloudinary))
