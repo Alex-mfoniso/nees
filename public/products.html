@@ -184,11 +184,11 @@
                 <div class="mb-3">
                   <label for="editProductPrice" class="form-label">Price</label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     class="form-control"
                     id="editProductPrice"
                     name="price"
+                    inputmode="decimal"
                     required
                   />
                 </div>
@@ -324,7 +324,7 @@
     <td>${product.name || ''}</td>
     <td>${product.category || ''}</td>
     <td>${product.quantity || 0}</td>
-    <td>₦${(+product.price || 0).toFixed(2)}</td>
+    <td>₦${formatPrice(product.price)}</td>
     <td class="${
       availability === 'In Stock' ? 'status-available' : 'status-unavailable'
     }">${availability}</td>
@@ -386,7 +386,9 @@
             product.category || ''
           document.getElementById('editProductDescription').value =
             product.description || ''
-          document.getElementById('editProductPrice').value = product.price
+          document.getElementById('editProductPrice').value = formatPrice(
+            product.price
+          )
           document.getElementById('editProductQuantity').value =
             product.quantity || 0
           document.getElementById('editProductAvailability').value =
@@ -407,6 +409,19 @@
           return `${backendUrl}${imagePath}`
         }
 
+        function formatPrice(value) {
+          const numberValue = Number(value)
+          if (Number.isNaN(numberValue)) return '0'
+          return numberValue.toLocaleString('en-NG', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          })
+        }
+
+        function parsePriceInput(value) {
+          return String(value || '').replace(/,/g, '').trim()
+        }
+
         document
           .getElementById('editProductImage')
           .addEventListener('change', (e) => {
@@ -415,6 +430,19 @@
             document.getElementById('editImagePreview').src =
               URL.createObjectURL(file)
           })
+        document
+          .getElementById('editProductPrice')
+          .addEventListener('input', (e) => {
+            const raw = parsePriceInput(e.target.value).replace(/[^\d.]/g, '')
+            if (!raw) {
+              e.target.value = ''
+              return
+            }
+            const parts = raw.split('.')
+            const whole = parts[0] ? Number(parts[0]).toLocaleString('en-NG') : '0'
+            const decimal = parts[1] !== undefined ? `.${parts[1].slice(0, 2)}` : ''
+            e.target.value = `${whole}${decimal}`
+          })
 
         document
           .getElementById('editProductForm')
@@ -422,6 +450,10 @@
             e.preventDefault()
             const id = document.getElementById('editProductId').value
             const formData = new FormData(e.target)
+            formData.set(
+              'price',
+              parsePriceInput(document.getElementById('editProductPrice').value)
+            )
             try {
               const res = await fetch(`${backendUrl}/api/products/${id}`, {
                 method: 'PUT',
@@ -440,7 +472,7 @@
                 row.children[1].textContent = updatedProduct.name || ''
                 row.children[2].textContent = updatedProduct.category || ''
                 row.children[3].textContent = updatedProduct.quantity || 0
-                row.children[4].textContent = `₦${(+updatedProduct.price || 0).toFixed(2)}`
+                row.children[4].textContent = `₦${formatPrice(updatedProduct.price)}`
                 row.children[5].className =
                   updatedAvailability === 'In Stock'
                     ? 'status-available'
@@ -489,3 +521,4 @@
 </html>
   </body>
 </html>
+
