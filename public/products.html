@@ -294,7 +294,15 @@
           try {
             // Show spinner
             tableBody.innerHTML = `<tr id="loadingRow"><td colspan="7" class="table-spinner"><div></div></td></tr>`
-            const res = await fetch(`${backendUrl}/api/products`)
+            const res = await fetch(
+              `${backendUrl}/api/products?_=${Date.now()}`,
+              {
+                cache: 'no-store',
+                headers: {
+                  'Cache-Control': 'no-cache'
+                }
+              }
+            )
             if (!res.ok) throw new Error('Failed to fetch products.')
             const products = await res.json()
 
@@ -421,6 +429,25 @@
                 body: formData
               })
               if (!res.ok) throw new Error('Failed to update product.')
+              const updatedProduct = await res.json()
+
+              // Update table row immediately, then refresh list from server.
+              const row = document.getElementById(`row-${id}`)
+              if (row) {
+                const updatedAvailability =
+                  updatedProduct.availability || 'In Stock'
+                row.children[0].innerHTML = `<img src="${getImageUrl(updatedProduct.thumbnail)}" class="img-fluid" alt="product" style="max-width: 50px; height: auto;" />`
+                row.children[1].textContent = updatedProduct.name || ''
+                row.children[2].textContent = updatedProduct.category || ''
+                row.children[3].textContent = updatedProduct.quantity || 0
+                row.children[4].textContent = `₦${(+updatedProduct.price || 0).toFixed(2)}`
+                row.children[5].className =
+                  updatedAvailability === 'In Stock'
+                    ? 'status-available'
+                    : 'status-unavailable'
+                row.children[5].textContent = updatedAvailability
+              }
+
               await loadProducts()
               bootstrap.Modal.getInstance(
                 document.getElementById('editProductModal')
