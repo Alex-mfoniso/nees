@@ -218,6 +218,32 @@
                     <option value="Pending">Pending</option>
                   </select>
                 </div>
+                <div class="mb-3">
+                  <label for="editProductImage" class="form-label"
+                    >Replace Product Image</label
+                  >
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="editProductImage"
+                    name="thumbnail"
+                    accept="image/*"
+                  />
+                  <small class="text-muted"
+                    >Leave empty to keep current image.</small
+                  >
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Current / New Preview</label>
+                  <div>
+                    <img
+                      id="editImagePreview"
+                      src="/placeholder.svg"
+                      alt="Product preview"
+                      style="max-width: 100px; height: auto; border-radius: 6px;"
+                    />
+                  </div>
+                </div>
               </div>
               <div class="modal-footer">
                 <button
@@ -277,11 +303,12 @@
 
             products.forEach((product) => {
               const availability = product.availability || 'In Stock'
+              const imageUrl = getImageUrl(product.thumbnail)
               const tr = document.createElement('tr')
               tr.id = `row-${product.id}`
               tr.innerHTML = `
     <td>
-        <img src="${product.thumbnail || '/placeholder.svg'}" 
+        <img src="${imageUrl}" 
              class="img-fluid" 
              alt="product"
              style="max-width: 50px; height: auto;" />
@@ -356,11 +383,30 @@
             product.quantity || 0
           document.getElementById('editProductAvailability').value =
             product.availability || 'In Stock'
+          document.getElementById('editProductImage').value = ''
+          document.getElementById('editImagePreview').src = getImageUrl(
+            product.thumbnail
+          )
           const modal = new bootstrap.Modal(
             document.getElementById('editProductModal')
           )
           modal.show()
         }
+
+        function getImageUrl(imagePath) {
+          if (!imagePath) return '/placeholder.svg'
+          if (imagePath.startsWith('http')) return imagePath
+          return `${backendUrl}${imagePath}`
+        }
+
+        document
+          .getElementById('editProductImage')
+          .addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0]
+            if (!file) return
+            document.getElementById('editImagePreview').src =
+              URL.createObjectURL(file)
+          })
 
         document
           .getElementById('editProductForm')
