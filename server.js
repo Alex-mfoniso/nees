@@ -63,8 +63,19 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+const reviewSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    comment: { type: String, required: true, trim: true },
+    rating: { type: Number, min: 1, max: 5, default: 5 },
+    avatarUrl: { type: String, default: '' }
+  },
+  { timestamps: true }
+)
+
 const Admin = mongoose.model('Admin', adminSchema)
 const Product = mongoose.model('Product', productSchema)
+const Review = mongoose.model('Review', reviewSchema)
 
 const serializeProduct = (productDoc) => {
   const product =
@@ -73,6 +84,16 @@ const serializeProduct = (productDoc) => {
   return {
     ...product,
     id: product._id?.toString?.() || product.id
+  }
+}
+
+const serializeReview = (reviewDoc) => {
+  const review =
+    typeof reviewDoc.toObject === 'function' ? reviewDoc.toObject() : reviewDoc
+
+  return {
+    ...review,
+    id: review._id?.toString?.() || review.id
   }
 }
 
@@ -129,6 +150,16 @@ const authenticate = (req, res, next) => {
     next()
   } catch {
     res.status(401).json({ error: 'Invalid token' })
+  }
+}
+
+const reviewClients = new Set()
+
+const broadcastReviews = (eventName, payload) => {
+  const message = `event: ${eventName}\ndata: ${JSON.stringify(payload)}\n\n`
+
+  for (const client of reviewClients) {
+    client.write(message)
   }
 }
 
@@ -242,6 +273,74 @@ app.get('/api/products/:id', async (req, res) => {
   const product = await Product.findById(req.params.id)
   if (!product) return res.status(404).json({ error: 'Not found' })
   res.json(serializeProduct(product))
+})
+
+// ==========================
+// CUSTOMER REVIEWS
+// ==========================
+app.get('/api/reviews', async (req, res) => {
+  const reviews = await Review.find().sort({ createdAt: -1 })
+  res.json(reviews.map(serializeReview))
+})
+
+app.get('/api/admin/reviews', authenticate, async (req, res) => {
+  const reviews = await Review.find().sort({ createdAt: -1 })
+  res.json(reviews.map(serializeReview))
+})
+
+app.post('/api/reviews', async (req, res) => {
+  try {
+    const { name, comment, rating, avatarUrl } = req.body
+
+    if (!name?.trim() || !comment?.trim()) {
+      return res.status(400).json({ error: 'Name and comment are required' })
+    }
+
+    const parsedRating = Number(rating)
+    const review = await Review.create({
+      name: name.trim(),
+      comment: comment.trim(),
+      rating: Number.isFinite(parsedRating) ? parsedRating : 5,
+      avatarUrl: avatarUrl?.trim() || ''
+    })
+
+    const serialized = serializeReview(review)
+    broadcastReviews('review-created', serialized)
+
+    res.status(201).json(serialized)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+app.get('/api/reviews/stream', async (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.flushHeaders?.()
+
+  res.write('event: connected\ndata: {"ok":true}\n\n')
+  reviewClients.add(res)
+
+  const keepAlive = setInterval(() => {
+    res.write(': ping\n\n')
+  }, 25000)
+
+  req.on('close', () => {
+    clearInterval(keepAlive)
+    reviewClients.delete(res)
+  })
+})
+
+app.delete('/api/reviews/:id', authenticate, async (req, res) => {
+  try {
+    const deletedReview = await Review.findByIdAndDelete(req.params.id)
+    if (!deletedReview) return res.status(404).json({ error: 'Not found' })
+
+    res.json({ success: true, id: req.params.id })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 app.put(
