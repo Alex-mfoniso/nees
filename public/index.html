@@ -95,6 +95,14 @@
             </div>
             <div class="card-icon"><i class="fas fa-users"></i></div>
           </div>
+
+          <div class="card stat-card total-reviews">
+            <div class="card-content">
+              <p class="card-title">Customer Reviews</p>
+              <p class="card-value" id="total-reviews-val">Loading...</p>
+            </div>
+            <div class="card-icon"><i class="fas fa-star"></i></div>
+          </div>
         </section>
 
         <section class="charts-section">
@@ -230,11 +238,18 @@
       async function loadDashboardStats() {
         try {
           const backendUrl = 'https://api.yunqidaenergyneessolar.com'
-          const res = await fetch(`${backendUrl}/api/products`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-          if (!res.ok) throw new Error('Failed to fetch products')
-          const products = await res.json()
+          const [productsRes, reviewsRes] = await Promise.all([
+            fetch(`${backendUrl}/api/products`, {
+              headers: { Authorization: `Bearer ${token}` }
+            }),
+            fetch(`${backendUrl}/api/admin/reviews`, {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+          ])
+          if (!productsRes.ok) throw new Error('Failed to fetch products')
+          if (!reviewsRes.ok) throw new Error('Failed to fetch reviews')
+          const products = await productsRes.json()
+          const reviews = await reviewsRes.json()
 
           // 1. Total Products
           document.getElementById('total-products-val').innerHTML =
@@ -255,6 +270,10 @@
           document.getElementById('total-customers-val').innerHTML = `${
             products.length * 8
           } <span class="change up">Active</span>`
+
+          document.getElementById('total-reviews-val').innerHTML = `${
+            reviews.length
+          } <span class="change up">Live</span>`
 
           // 4. Populate Best Selling Product List (Top 3 or random 3)
           const bestList = document.getElementById('best-selling-list')
