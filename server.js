@@ -73,9 +73,23 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+const heroSlideSchema = new mongoose.Schema(
+  {
+    eyebrow: { type: String, required: true, trim: true },
+    title: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
+    buttonText: { type: String, required: true, trim: true },
+    buttonLink: { type: String, required: true, trim: true },
+    image: { type: String, default: '' },
+    sortOrder: { type: Number, default: 0 }
+  },
+  { timestamps: true }
+)
+
 const Admin = mongoose.model('Admin', adminSchema)
 const Product = mongoose.model('Product', productSchema)
 const Review = mongoose.model('Review', reviewSchema)
+const HeroSlide = mongoose.model('HeroSlide', heroSlideSchema)
 
 const serializeProduct = (productDoc) => {
   const product =
@@ -97,6 +111,18 @@ const serializeReview = (reviewDoc) => {
   }
 }
 
+const serializeHeroSlide = (heroSlideDoc) => {
+  const heroSlide =
+    typeof heroSlideDoc.toObject === 'function'
+      ? heroSlideDoc.toObject()
+      : heroSlideDoc
+
+  return {
+    ...heroSlide,
+    id: heroSlide._id?.toString?.() || heroSlide.id
+  }
+}
+
 // ==========================
 // CLOUDINARY
 // ==========================
@@ -115,6 +141,11 @@ const formatFile = (file) =>
 const uploadToCloudinary = async (file) => {
   const fileUri = formatFile(file)
   return cloudinary.uploader.upload(fileUri, { folder: 'nees_products' })
+}
+
+const uploadHeroImageToCloudinary = async (file) => {
+  const fileUri = formatFile(file)
+  return cloudinary.uploader.upload(fileUri, { folder: 'nees_hero' })
 }
 
 const parseOptionalBoolean = (value) => {
@@ -330,6 +361,77 @@ app.get('/api/reviews/stream', async (req, res) => {
     clearInterval(keepAlive)
     reviewClients.delete(res)
   })
+})
+
+app.get('/api/hero-slides', async (req, res) => {
+  const slides = await HeroSlide.find().sort({ sortOrder: 1, createdAt: -1 })
+  res.json(slides.map(serializeHeroSlide))
+})
+
+app.get('/api/admin/hero-slides', authenticate, async (req, res) => {
+  const slides = await HeroSlide.find().sort({ sortOrder: 1, createdAt: -1 })
+  res.json(slides.map(serializeHeroSlide))
+})
+
+app.post(
+  '/api/admin/hero-slides',
+  authenticate,
+  upload.single('image'),
+  async (req, res) => {
+    try {
+      const {
+        eyebrow,
+        title,
+        description,
+        buttonText,
+        buttonLink,
+        sortOrder
+      } = req.body
+
+      if (
+        !eyebrow?.trim() ||
+        !title?.trim() ||
+        !description?.trim() ||
+        !buttonText?.trim() ||
+        !buttonLink?.trim()
+      ) {
+        return res.status(400).json({ error: 'Missing fields' })
+      }
+
+      let image = ''
+      if (req.file) {
+        const upload = await uploadHeroImageToCloudinary(req.file)
+        image = upload.secure_url
+      }
+
+      const heroSlide = await HeroSlide.create({
+        eyebrow: eyebrow.trim(),
+        title: title.trim(),
+        description: description.trim(),
+        buttonText: buttonText.trim(),
+        buttonLink: buttonLink.trim(),
+        image,
+        sortOrder: Number(sortOrder) || 0
+      })
+
+      res.status(201).json({
+        ...serializeHeroSlide(heroSlide)
+      })
+    } catch (err) {
+      res.status(500).json({ error: err.message })
+    }
+  }
+)
+
+app.delete('/api/admin/hero-slides/:id', authenticate, async (req, res) => {
+  try {
+    const deletedSlide = await HeroSlide.findByIdAndDelete(req.params.id)
+    if (!deletedSlide) return res.status(404).json({ error: 'Not found' })
+
+    res.json({ success: true, id: req.params.id })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 app.delete('/api/reviews/:id', authenticate, async (req, res) => {
