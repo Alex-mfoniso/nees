@@ -147,7 +147,12 @@
             <div class="review-create-grid">
               <div class="mb-0">
                 <label for="reviewName" class="form-label">Customer Name</label>
-                <input id="reviewName" class="form-control" type="text" required />
+                <input
+                  id="reviewName"
+                  class="form-control"
+                  type="text"
+                  required
+                />
               </div>
               <div class="mb-0">
                 <label for="reviewRating" class="form-label">Rating</label>
@@ -213,7 +218,12 @@
       </main>
     </div>
 
-    <div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="reviewDetailModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -236,7 +246,12 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Comment</label>
-              <textarea id="detailComment" class="form-control" rows="5" readonly></textarea>
+              <textarea
+                id="detailComment"
+                class="form-control"
+                rows="5"
+                readonly
+              ></textarea>
             </div>
             <div>
               <label class="form-label">Created At</label>
@@ -244,10 +259,18 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
               Close
             </button>
-            <button type="button" class="btn btn-danger" id="deleteFromModalBtn">
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="deleteFromModalBtn"
+            >
               Delete Review
             </button>
           </div>
@@ -260,7 +283,7 @@
     <script>
       const backendUrl =
         window.location.protocol === 'file:'
-          ? 'https://api.yunqidaenergyneessolar.com'
+          ? 'https://api.neessolarsunrisenigeria.com'
           : window.location.origin
       const token = localStorage.getItem('token')
       let selectedReviewId = null
@@ -327,9 +350,13 @@
       function openReviewModal(review) {
         selectedReviewId = review.id
         document.getElementById('detailName').value = review.name || ''
-        document.getElementById('detailRating').value = `${renderStars(review.rating)} (${review.rating || 5}/5)`
+        document.getElementById('detailRating').value = `${renderStars(
+          review.rating
+        )} (${review.rating || 5}/5)`
         document.getElementById('detailComment').value = review.comment || ''
-        document.getElementById('detailDate').value = formatDate(review.createdAt)
+        document.getElementById('detailDate').value = formatDate(
+          review.createdAt
+        )
         new bootstrap.Modal(document.getElementById('reviewDetailModal')).show()
       }
 
@@ -364,7 +391,9 @@
             tr.innerHTML = `
               <td>${escapeHtml(review.name)}</td>
               <td>${renderStars(review.rating)}</td>
-              <td><div class="review-comment" title="${escapeHtml(review.comment)}">${escapeHtml(review.comment)}</div></td>
+              <td><div class="review-comment" title="${escapeHtml(
+                review.comment
+              )}">${escapeHtml(review.comment)}</div></td>
               <td>${formatDate(review.createdAt)}</td>
               <td>
                 <div class="btn-group" role="group">
@@ -382,8 +411,9 @@
             tr.querySelector('.view-review-btn').addEventListener('click', () =>
               openReviewModal(review)
             )
-            tr.querySelector('.delete-review-btn').addEventListener('click', () =>
-              deleteReview(review.id)
+            tr.querySelector('.delete-review-btn').addEventListener(
+              'click',
+              () => deleteReview(review.id)
             )
           })
         } catch (error) {

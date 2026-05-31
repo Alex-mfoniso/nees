@@ -42,8 +42,12 @@
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
       .hero-thumb {
         width: 90px;
@@ -148,53 +152,121 @@
             <div class="review-create-grid">
               <div class="mb-0">
                 <label for="heroEyebrow" class="form-label">Eyebrow</label>
-                <input id="heroEyebrow" class="form-control" type="text" required value="Welcome to Nees Solar" />
+                <input
+                  id="heroEyebrow"
+                  class="form-control"
+                  type="text"
+                  required
+                  value="Welcome to Nees Solar"
+                />
               </div>
               <div class="mb-0">
                 <label for="heroSortOrder" class="form-label">Sort Order</label>
-                <input id="heroSortOrder" class="form-control" type="number" value="0" />
+                <input
+                  id="heroSortOrder"
+                  class="form-control"
+                  type="number"
+                  value="0"
+                />
               </div>
             </div>
 
             <div class="mt-3">
               <label for="heroTitle" class="form-label">Title</label>
-              <input id="heroTitle" class="form-control" type="text" required value="SMART ENERGY." />
+              <input
+                id="heroTitle"
+                class="form-control"
+                type="text"
+                required
+                value="SMART ENERGY."
+              />
             </div>
 
             <div class="mt-3">
-              <label for="heroDescription" class="form-label">Description</label>
-              <textarea id="heroDescription" class="form-control" rows="3" required>Harness the power of the sun with our premium solar solutions</textarea>
+              <label for="heroDescription" class="form-label"
+                >Description</label
+              >
+              <textarea
+                id="heroDescription"
+                class="form-control"
+                rows="3"
+                required
+              >
+Harness the power of the sun with our premium solar solutions</textarea
+              >
             </div>
 
             <div class="review-create-grid mt-3">
               <div class="mb-0">
-                <label for="heroButtonText" class="form-label">Button Text</label>
-                <input id="heroButtonText" class="form-control" type="text" required value="SHOP NOW" />
+                <label for="heroButtonText" class="form-label"
+                  >Button Text</label
+                >
+                <input
+                  id="heroButtonText"
+                  class="form-control"
+                  type="text"
+                  required
+                  value="SHOP NOW"
+                />
               </div>
               <div class="mb-0">
-                <label for="heroButtonLink" class="form-label">Button Link</label>
-                <input id="heroButtonLink" class="form-control" type="text" required value="/products" />
+                <label for="heroButtonLink" class="form-label"
+                  >Button Link</label
+                >
+                <input
+                  id="heroButtonLink"
+                  class="form-control"
+                  type="text"
+                  required
+                  value="/products"
+                />
               </div>
             </div>
 
             <div class="mt-3">
               <label for="heroImage" class="form-label">Hero Image</label>
-              <input id="heroImage" class="form-control" type="file" accept="image/*" />
-              <small class="text-muted">Upload a new image for the slide.</small>
+              <input
+                id="heroImage"
+                class="form-control"
+                type="file"
+                accept="image/*"
+              />
+              <small class="text-muted"
+                >Upload a new image for the slide.</small
+              >
             </div>
 
             <div class="mt-3">
-              <img id="heroImagePreview" class="slide-preview" src="/placeholder.svg" alt="Hero preview" />
+              <img
+                id="heroImagePreview"
+                class="slide-preview"
+                src="/placeholder.svg"
+                alt="Hero preview"
+              />
             </div>
 
             <div class="mt-3">
-              <label for="heroBackgroundImage" class="form-label">Background Photo</label>
-              <input id="heroBackgroundImage" class="form-control" type="file" accept="image/*" />
-              <small class="text-muted">Optional. If empty, the green background stays.</small>
+              <label for="heroBackgroundImage" class="form-label"
+                >Background Photo</label
+              >
+              <input
+                id="heroBackgroundImage"
+                class="form-control"
+                type="file"
+                accept="image/*"
+              />
+              <small class="text-muted"
+                >Optional. If empty, the green background stays.</small
+              >
             </div>
 
             <div class="mt-3">
-              <img id="heroBackgroundPreview" class="hero-bg-preview" src="/placeholder.svg" alt="Background preview" />
+              <img
+                id="heroBackgroundPreview"
+                class="hero-bg-preview"
+                src="/placeholder.svg"
+                alt="Background preview"
+              />
             </div>
 
             <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
@@ -235,12 +307,14 @@
     <script>
       const backendUrl =
         window.location.protocol === 'file:'
-          ? 'https://api.yunqidaenergyneessolar.com'
+          ? 'https://api.neessolarsunrisenigeria.com'
           : window.location.origin
       const token = localStorage.getItem('token')
       const heroSlideForm = document.getElementById('heroSlideForm')
       const heroFormStatus = document.getElementById('heroFormStatus')
-      const heroBackgroundPreview = document.getElementById('heroBackgroundPreview')
+      const heroBackgroundPreview = document.getElementById(
+        'heroBackgroundPreview'
+      )
 
       function redirectToLogin() {
         window.location.href = `${window.location.origin}/admin-login.html`
@@ -261,17 +335,23 @@
       })()
 
       const sidebar = document.querySelector('.sidebar')
-      document.getElementById('hamburger-open').addEventListener('click', function () {
-        sidebar.classList.add('show')
-      })
-      document.getElementById('hamburger-close').addEventListener('click', function () {
-        sidebar.classList.remove('show')
-      })
-      document.getElementById('logout-link').addEventListener('click', function (e) {
-        e.preventDefault()
-        localStorage.removeItem('token')
-        window.location.href = 'admin-login.html'
-      })
+      document
+        .getElementById('hamburger-open')
+        .addEventListener('click', function () {
+          sidebar.classList.add('show')
+        })
+      document
+        .getElementById('hamburger-close')
+        .addEventListener('click', function () {
+          sidebar.classList.remove('show')
+        })
+      document
+        .getElementById('logout-link')
+        .addEventListener('click', function (e) {
+          e.preventDefault()
+          localStorage.removeItem('token')
+          window.location.href = 'admin-login.html'
+        })
 
       function escapeHtml(value) {
         return String(value || '')
@@ -297,7 +377,8 @@
       document.getElementById('heroImage').addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0]
         if (!file) return
-        document.getElementById('heroImagePreview').src = URL.createObjectURL(file)
+        document.getElementById('heroImagePreview').src =
+          URL.createObjectURL(file)
       })
 
       document
@@ -313,13 +394,16 @@
         try {
           tableBody.innerHTML =
             '<tr id="loadingRow"><td colspan="6" class="table-spinner"><div></div></td></tr>'
-          const res = await fetch(`${backendUrl}/api/admin/hero-slides?_=${Date.now()}`, {
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache',
-              Authorization: `Bearer ${token}`
+          const res = await fetch(
+            `${backendUrl}/api/admin/hero-slides?_=${Date.now()}`,
+            {
+              cache: 'no-store',
+              headers: {
+                'Cache-Control': 'no-cache',
+                Authorization: `Bearer ${token}`
+              }
             }
-          })
+          )
           if (!res.ok) throw new Error('Failed to fetch hero slides.')
           const slides = await res.json()
           tableBody.innerHTML = ''
@@ -334,14 +418,20 @@
             const tr = document.createElement('tr')
             tr.id = `slide-${slide.id}`
             tr.innerHTML = `
-              <td><img src="${getImageUrl(slide.image)}" class="hero-thumb" alt="Hero slide" /></td>
+              <td><img src="${getImageUrl(
+                slide.image
+              )}" class="hero-thumb" alt="Hero slide" /></td>
               <td>${
                 slide.backgroundImage
-                  ? `<img src="${getImageUrl(slide.backgroundImage)}" class="hero-bg-thumb" alt="Background image" />`
+                  ? `<img src="${getImageUrl(
+                      slide.backgroundImage
+                    )}" class="hero-bg-thumb" alt="Background image" />`
                   : '<span class="badge bg-success">Green default</span>'
               }</td>
               <td>${escapeHtml(slide.title)}</td>
-              <td><div class="hero-desc" title="${escapeHtml(slide.description)}">${escapeHtml(slide.description)}</div></td>
+              <td><div class="hero-desc" title="${escapeHtml(
+                slide.description
+              )}">${escapeHtml(slide.description)}</div></td>
               <td>${escapeHtml(slide.sortOrder ?? 0)}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-outline-danger delete-slide-btn">
@@ -350,8 +440,9 @@
               </td>
             `
             tableBody.appendChild(tr)
-            tr.querySelector('.delete-slide-btn').addEventListener('click', () =>
-              deleteSlide(slide.id)
+            tr.querySelector('.delete-slide-btn').addEventListener(
+              'click',
+              () => deleteSlide(slide.id)
             )
           })
         } catch (error) {
@@ -366,19 +457,38 @@
         heroFormStatus.textContent = 'Publishing...'
 
         const formData = new FormData()
-        formData.append('eyebrow', document.getElementById('heroEyebrow').value.trim())
-        formData.append('title', document.getElementById('heroTitle').value.trim())
-        formData.append('description', document.getElementById('heroDescription').value.trim())
-        formData.append('buttonText', document.getElementById('heroButtonText').value.trim())
-        formData.append('buttonLink', document.getElementById('heroButtonLink').value.trim())
-        formData.append('sortOrder', document.getElementById('heroSortOrder').value || '0')
+        formData.append(
+          'eyebrow',
+          document.getElementById('heroEyebrow').value.trim()
+        )
+        formData.append(
+          'title',
+          document.getElementById('heroTitle').value.trim()
+        )
+        formData.append(
+          'description',
+          document.getElementById('heroDescription').value.trim()
+        )
+        formData.append(
+          'buttonText',
+          document.getElementById('heroButtonText').value.trim()
+        )
+        formData.append(
+          'buttonLink',
+          document.getElementById('heroButtonLink').value.trim()
+        )
+        formData.append(
+          'sortOrder',
+          document.getElementById('heroSortOrder').value || '0'
+        )
 
         const imageFile = document.getElementById('heroImage').files[0]
         if (imageFile) {
           formData.append('image', imageFile)
         }
 
-        const backgroundFile = document.getElementById('heroBackgroundImage').files[0]
+        const backgroundFile = document.getElementById('heroBackgroundImage')
+          .files[0]
         if (backgroundFile) {
           formData.append('backgroundImage', backgroundFile)
         }
@@ -393,7 +503,8 @@
           })
 
           const data = await res.json()
-          if (!res.ok) throw new Error(data.error || 'Failed to publish hero slide.')
+          if (!res.ok)
+            throw new Error(data.error || 'Failed to publish hero slide.')
 
           heroSlideForm.reset()
           document.getElementById('heroImagePreview').src = '/placeholder.svg'

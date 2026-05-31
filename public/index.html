@@ -242,7 +242,7 @@
       // Fetch products and populate dashboard
       async function loadDashboardStats() {
         try {
-          const backendUrl = 'https://api.yunqidaenergyneessolar.com'
+          const backendUrl = 'https://api.neessolarsunrisenigeria.com'
           const [productsRes, reviewsRes] = await Promise.all([
             fetch(`${backendUrl}/api/products`, {
               headers: { Authorization: `Bearer ${token}` }
@@ -276,9 +276,8 @@
             products.length * 8
           } <span class="change up">Active</span>`
 
-          document.getElementById('total-reviews-val').innerHTML = `${
-            reviews.length
-          } <span class="change up">Live</span>`
+          document.getElementById('total-reviews-val').innerHTML =
+            `${reviews.length} <span class="change up">Live</span>`
 
           // 4. Populate Best Selling Product List (Top 3 or random 3)
           const bestList = document.getElementById('best-selling-list')
