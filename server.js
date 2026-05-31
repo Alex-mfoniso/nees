@@ -81,6 +81,7 @@ const heroSlideSchema = new mongoose.Schema(
     buttonText: { type: String, required: true, trim: true },
     buttonLink: { type: String, required: true, trim: true },
     image: { type: String, default: '' },
+    backgroundImage: { type: String, default: '' },
     sortOrder: { type: Number, default: 0 }
   },
   { timestamps: true }
@@ -376,7 +377,10 @@ app.get('/api/admin/hero-slides', authenticate, async (req, res) => {
 app.post(
   '/api/admin/hero-slides',
   authenticate,
-  upload.single('image'),
+  upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'backgroundImage', maxCount: 1 }
+  ]),
   async (req, res) => {
     try {
       const {
@@ -399,9 +403,18 @@ app.post(
       }
 
       let image = ''
-      if (req.file) {
-        const upload = await uploadHeroImageToCloudinary(req.file)
+      let backgroundImage = ''
+
+      if (req.files?.image?.[0]) {
+        const upload = await uploadHeroImageToCloudinary(req.files.image[0])
         image = upload.secure_url
+      }
+
+      if (req.files?.backgroundImage?.[0]) {
+        const upload = await uploadHeroImageToCloudinary(
+          req.files.backgroundImage[0]
+        )
+        backgroundImage = upload.secure_url
       }
 
       const heroSlide = await HeroSlide.create({
@@ -411,6 +424,7 @@ app.post(
         buttonText: buttonText.trim(),
         buttonLink: buttonLink.trim(),
         image,
+        backgroundImage,
         sortOrder: Number(sortOrder) || 0
       })
 
