@@ -75,12 +75,6 @@ const reviewSchema = new mongoose.Schema(
 
 const heroSlideSchema = new mongoose.Schema(
   {
-    eyebrow: { type: String, required: true, trim: true },
-    title: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true },
-    buttonText: { type: String, required: true, trim: true },
-    buttonLink: { type: String, required: true, trim: true },
-    image: { type: String, default: '' },
     backgroundImage: { type: String, default: '' },
     sortOrder: { type: Number, default: 0 }
   },
@@ -377,38 +371,11 @@ app.get('/api/admin/hero-slides', authenticate, async (req, res) => {
 app.post(
   '/api/admin/hero-slides',
   authenticate,
-  upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'backgroundImage', maxCount: 1 }
-  ]),
+  upload.fields([{ name: 'backgroundImage', maxCount: 1 }]),
   async (req, res) => {
     try {
-      const {
-        eyebrow,
-        title,
-        description,
-        buttonText,
-        buttonLink,
-        sortOrder
-      } = req.body
-
-      if (
-        !eyebrow?.trim() ||
-        !title?.trim() ||
-        !description?.trim() ||
-        !buttonText?.trim() ||
-        !buttonLink?.trim()
-      ) {
-        return res.status(400).json({ error: 'Missing fields' })
-      }
-
-      let image = ''
+      const { sortOrder } = req.body
       let backgroundImage = ''
-
-      if (req.files?.image?.[0]) {
-        const upload = await uploadHeroImageToCloudinary(req.files.image[0])
-        image = upload.secure_url
-      }
 
       if (req.files?.backgroundImage?.[0]) {
         const upload = await uploadHeroImageToCloudinary(
@@ -417,13 +384,11 @@ app.post(
         backgroundImage = upload.secure_url
       }
 
+      if (!backgroundImage) {
+        return res.status(400).json({ error: 'Missing fields' })
+      }
+
       const heroSlide = await HeroSlide.create({
-        eyebrow: eyebrow.trim(),
-        title: title.trim(),
-        description: description.trim(),
-        buttonText: buttonText.trim(),
-        buttonLink: buttonLink.trim(),
-        image,
         backgroundImage,
         sortOrder: Number(sortOrder) || 0
       })
